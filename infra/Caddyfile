@@ -14,7 +14,7 @@
   }
 }
 
-merged.legal.org.ua {
+merged.com.ua, merged.legal.org.ua {
   encode zstd gzip
   import securityHeaders
   reverse_proxy landing:8080
@@ -23,7 +23,11 @@ merged.legal.org.ua {
   }
 }
 
-portal.legal.org.ua {
+www.merged.com.ua {
+  redir https://merged.com.ua{uri} 301
+}
+
+portal.merged.com.ua, portal.legal.org.ua {
   encode zstd gzip
   import securityHeaders
   reverse_proxy portal:3000
