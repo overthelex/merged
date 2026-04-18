@@ -166,8 +166,8 @@ jobs:
         run: |
           sleep 15
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            'sudo docker exec merged-landing wget -qO- http://localhost:8080/ | grep -qi "merged" && echo "landing healthy"'
+            'sudo docker exec merged-landing wget -qO- http://127.0.0.1:8080/ | grep -qi "merged" && echo "landing healthy"'
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            'sudo docker exec merged-portal wget -qO- http://localhost:3000/api/health | grep -q "\"status\":\"ok\"" && echo "portal healthy"'
+            'sudo docker exec merged-portal wget -qO- http://127.0.0.1:3000/api/health | grep -q "\"status\":\"ok\"" && echo "portal healthy"'
           curl -sSf https://merged.legal.org.ua/ | grep -qi "технічний скринінг" && echo "landing public endpoint healthy"
           curl -sSf https://app.merged.legal.org.ua/api/health | grep -q '"status":"ok"' && echo "portal public endpoint healthy"
