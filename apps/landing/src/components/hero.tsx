@@ -113,6 +113,7 @@ function Topbar() {
           { href: '#problema', label: 'Проблема' },
           { href: '#yak-tse-pratsuye', label: 'Як працює' },
           { href: '#rivni', label: 'Рівні' },
+          { href: '/blog', label: 'Блог' },
           { href: '#zayavka', label: 'Демо' },
         ].map((link) => (
           <a
