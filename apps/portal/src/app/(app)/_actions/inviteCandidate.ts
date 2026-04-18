@@ -83,8 +83,8 @@ export async function inviteCandidate(
     return {
       ok: false,
       message:
-        result.reason === 'RESEND_API_KEY not set'
-          ? 'Email-провайдер не налаштовано на цьому оточенні (RESEND_API_KEY). Посилання зʼявилося у картці — можете скопіювати вручну.'
+        result.reason === 'SMTP not configured'
+          ? 'SMTP не налаштовано на цьому оточенні (SMTP_HOST). Посилання зʼявилося у картці — можете скопіювати вручну.'
           : `Не вдалося надіслати лист: ${result.reason ?? 'невідома помилка'}`,
     };
   }

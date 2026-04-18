@@ -1,21 +1,34 @@
-// Thin Resend client. No-op if RESEND_API_KEY isn't set so local dev keeps
-// working without third-party credentials.
+// Thin SMTP client built on nodemailer. No-op if SMTP_HOST isn't set so
+// local dev keeps working without mail-server credentials.
+
+import nodemailer, { type Transporter } from 'nodemailer';
 
 export type EmailConfig = {
-  apiKey: string;
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string | null;
+  pass: string | null;
   from: string;
   brandUrl: string;
   logoUrl: string;
 };
 
 export function readEmailConfigFromEnv(env: NodeJS.ProcessEnv = process.env): EmailConfig | null {
-  const apiKey = env.RESEND_API_KEY;
-  if (!apiKey) return null;
+  const host = env.SMTP_HOST?.trim();
+  if (!host) return null;
+  const port = Number.parseInt(env.SMTP_PORT ?? '465', 10);
+  // Default to implicit TLS on 465; STARTTLS otherwise. Explicit override wins.
+  const secure = env.SMTP_SECURE
+    ? env.SMTP_SECURE === 'true' || env.SMTP_SECURE === '1'
+    : port === 465;
+  const user = env.SMTP_USER?.trim() || null;
+  const pass = env.SMTP_PASS ?? null;
   const from = env.EMAIL_FROM ?? 'merged <no-reply@merged.com.ua>';
   const brandUrl = env.EMAIL_BRAND_URL ?? 'https://merged.com.ua';
   const logoUrl =
     env.EMAIL_LOGO_URL ?? 'https://portal.merged.com.ua/brand/logo-ink-128.png';
-  return { apiKey, from, brandUrl, logoUrl };
+  return { host, port, secure, user, pass, from, brandUrl, logoUrl };
 }
 
 export type SendInput = {
@@ -31,8 +44,24 @@ export type SendResult =
   | { ok: false; skipped: true; reason: string; error?: undefined }
   | { ok: false; skipped?: false; error: string; reason?: undefined };
 
+let _transport: Transporter | null = null;
+let _transportKey: string | null = null;
+
+function transport(cfg: EmailConfig): Transporter {
+  const key = `${cfg.host}:${cfg.port}:${cfg.secure}:${cfg.user ?? ''}`;
+  if (_transport && _transportKey === key) return _transport;
+  _transport = nodemailer.createTransport({
+    host: cfg.host,
+    port: cfg.port,
+    secure: cfg.secure,
+    auth: cfg.user && cfg.pass ? { user: cfg.user, pass: cfg.pass } : undefined,
+  });
+  _transportKey = key;
+  return _transport;
+}
+
 export async function sendEmail(cfg: EmailConfig | null, input: SendInput): Promise<SendResult> {
-  if (!cfg) return { ok: false, skipped: true, reason: 'RESEND_API_KEY not set' };
+  if (!cfg) return { ok: false, skipped: true, reason: 'SMTP not configured' };
 
   const recipients = Array.isArray(input.to) ? input.to : [input.to];
   const cleanRecipients = recipients
@@ -42,26 +71,17 @@ export async function sendEmail(cfg: EmailConfig | null, input: SendInput): Prom
     return { ok: false, skipped: true, reason: 'no recipients' };
   }
 
-  const resp = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${cfg.apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+  try {
+    const info = await transport(cfg).sendMail({
       from: input.from ?? cfg.from,
       to: cleanRecipients,
       subject: input.subject,
       html: input.html,
-      reply_to: input.replyTo,
-    }),
-  });
-
-  if (!resp.ok) {
-    const body = await resp.text().catch(() => '');
-    return { ok: false, error: `resend ${resp.status}: ${body.slice(0, 500)}` };
+      replyTo: input.replyTo,
+    });
+    return { ok: true, id: info.messageId ?? '' };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: `smtp: ${msg.slice(0, 500)}` };
   }
-
-  const data = (await resp.json().catch(() => ({}))) as { id?: string };
-  return { ok: true, id: data.id ?? '' };
 }
