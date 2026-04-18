@@ -1,0 +1,21 @@
+{
+  "name": "merged",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev:landing": "pnpm --filter @merged/landing dev",
+    "dev:portal": "pnpm --filter @merged/portal dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20.18",
+    "pnpm": ">=9.15"
+  }
+}

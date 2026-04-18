@@ -1,0 +1,39 @@
+# Landing — static export
+merged.legal.org.ua {
+  root * /srv/merged/landing
+  file_server
+  encode zstd gzip
+  try_files {path} {path}/ {path}.html =404
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Content-Type-Options nosniff
+    Referrer-Policy strict-origin-when-cross-origin
+    Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  }
+
+  # Cache static assets hard
+  @assets path /_next/static/* /favicon.ico /*.png /*.svg /*.jpg /*.webp
+  header @assets Cache-Control "public, max-age=31536000, immutable"
+
+  log {
+    output file /var/log/caddy/merged.log
+    format console
+  }
+}
+
+# Portal — Next.js on :3000, reverse-proxied (v1)
+app.merged.legal.org.ua {
+  encode zstd gzip
+  reverse_proxy localhost:3000
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options nosniff
+  }
+
+  log {
+    output file /var/log/caddy/merged-portal.log
+    format console
+  }
+}
