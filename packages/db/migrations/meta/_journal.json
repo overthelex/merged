@@ -15,6 +15,13 @@
       "when": 1776513237375,
       "tag": "0001_pink_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776537090778,
+      "tag": "0002_milky_komodo",
+      "breakpoints": true
     }
   ]
 }

@@ -88,7 +88,7 @@ function extractText(resp: unknown): string {
 function extractJson(text: string): unknown {
   // Accept raw JSON or a ```json fenced block.
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const candidate = (fenced ? fenced[1] : text).trim();
+  const candidate = (fenced?.[1] ?? text).trim();
   try {
     return JSON.parse(candidate);
   } catch (e) {
