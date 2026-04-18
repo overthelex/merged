@@ -95,6 +95,18 @@ jobs:
           GITHUB_APP_INSTALLATION_ID=${{ secrets.GH_APP_INSTALLATION_ID }}
           GITHUB_WEBHOOK_SECRET=${{ secrets.GH_WEBHOOK_SECRET }}
           TASKS_ORG=imerged
+          # mail.legal.org.ua and mail.merged.com.ua both resolve to the
+          # shared mail MTA (178.162.234.145). We use mail.legal.org.ua here
+          # because the MTA's TLS cert advertises it as a SAN while a
+          # merged-specific SAN isn't wired into postfix SNI yet. Relay
+          # still works because merged-prod is in the MTA's mynetworks and
+          # OpenDKIM signs by sender domain, not HELO.
+          SMTP_HOST=mail.legal.org.ua
+          SMTP_PORT=587
+          SMTP_SECURE=false
+          EMAIL_FROM=merged <no-reply@merged.com.ua>
+          EMAIL_BRAND_URL=https://merged.com.ua
+          EMAIL_LOGO_URL=https://portal.merged.com.ua/brand/logo-ink-128.png
           ENV
           chmod 600 .env.portal
           EOF

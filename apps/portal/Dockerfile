@@ -16,6 +16,7 @@ COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/apps/portal/node_modules ./apps/portal/node_modules
 COPY --from=deps /repo/packages/db/node_modules ./packages/db/node_modules
 COPY --from=deps /repo/packages/github-app/node_modules ./packages/github-app/node_modules
+COPY --from=deps /repo/packages/email/node_modules ./packages/email/node_modules
 COPY pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/portal ./apps/portal
 COPY packages/db ./packages/db
