@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const items = [
-  { key: 'assignments', label: 'Задачі', href: '/', match: (p: string) => p === '/' || p.startsWith('/assignments') },
+  { key: 'assignments', label: 'Задачі', href: '/assignments', match: (p: string) => p === '/' || p.startsWith('/assignments') },
   { key: 'candidates', label: 'Кандидати', href: '/candidates', match: (p: string) => p.startsWith('/candidates') },
   { key: 'settings', label: 'Налаштування', href: '/settings', match: (p: string) => p.startsWith('/settings') },
 ] as const;
