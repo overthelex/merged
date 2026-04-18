@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { signIn, auth } from '@/auth';
 import { redirect } from 'next/navigation';
 
@@ -107,16 +108,7 @@ export default async function LoginPage({
 
 function LogoMark() {
   return (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden>
-      <rect width="28" height="28" rx="7" fill="#0b0f17" />
-      <path
-        d="M7.5 19V9m0 10c2.5 0 4-2 4-4.5S10 10 8 10M20.5 9v10m0-10c-2.5 0-4 2-4 4.5S18 18 20 18"
-        stroke="#00d488"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <circle cx="14" cy="14" r="1.6" fill="#00d488" />
-    </svg>
+    <Image src="/brand/logo-ink-128.png" alt="merged" width={24} height={24} priority />
   );
 }
 
