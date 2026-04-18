@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: theme('colors.paper.DEFAULT');
+  color: theme('colors.ink.DEFAULT');
+  font-feature-settings: 'ss01', 'cv11', 'tnum';
+}
+
+::selection {
+  background: theme('colors.accent.soft');
+  color: theme('colors.ink.DEFAULT');
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer utilities {
+  .label-mono {
+    @apply font-mono text-xs uppercase tracking-[0.25em] leading-none;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
