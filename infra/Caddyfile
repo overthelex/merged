@@ -23,7 +23,7 @@ merged.legal.org.ua {
   }
 }
 
-app.merged.legal.org.ua {
+portal.legal.org.ua {
   encode zstd gzip
   import securityHeaders
   reverse_proxy portal:3000

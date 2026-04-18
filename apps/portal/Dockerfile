@@ -20,7 +20,7 @@ COPY packages/db ./packages/db
 # to real services. Runtime env (from .env.portal) overrides them in production.
 ENV DATABASE_URL=postgres://build:build@localhost:5432/build \
     AUTH_SECRET=build-placeholder-auth-secret-not-used-at-runtime \
-    AUTH_URL=https://app.merged.legal.org.ua \
+    AUTH_URL=https://portal.legal.org.ua \
     AUTH_TRUST_HOST=true \
     AUTH_GOOGLE_ID=build-placeholder \
     AUTH_GOOGLE_SECRET=build-placeholder

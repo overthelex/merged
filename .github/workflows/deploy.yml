@@ -85,7 +85,7 @@ jobs:
           DATABASE_URL=postgres://merged:\${PG_PW}@merged-postgres:5432/merged
           PUBLIC_BASE_URL=https://merged.legal.org.ua
           APP_VERSION=${{ github.sha }}
-          AUTH_URL=https://app.merged.legal.org.ua
+          AUTH_URL=https://portal.legal.org.ua
           AUTH_TRUST_HOST=true
           AUTH_SECRET=${{ secrets.AUTH_SECRET }}
           AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }}
@@ -170,4 +170,4 @@ jobs:
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
             'sudo docker exec merged-portal wget -qO- http://127.0.0.1:3000/api/health | grep -q "\"status\":\"ok\"" && echo "portal healthy"'
           curl -sSf https://merged.legal.org.ua/ | grep -qi "технічний скринінг" && echo "landing public endpoint healthy"
-          curl -sSf https://app.merged.legal.org.ua/api/health | grep -q '"status":"ok"' && echo "portal public endpoint healthy"
+          curl -sSf https://portal.legal.org.ua/api/health | grep -q '"status":"ok"' && echo "portal public endpoint healthy"
