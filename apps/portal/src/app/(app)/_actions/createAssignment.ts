@@ -23,6 +23,11 @@ import {
   renderAssignmentMarkdown,
   renderRunnerScript,
 } from '@/lib/assignmentTemplate';
+import {
+  sendAssignmentCreatedEmail,
+  seniorityLabel,
+  stripGithubPrefix,
+} from '@/lib/email';
 
 const GITHUB_URL = /^https:\/\/github\.com\/([^/\s]+)\/([^/\s.]+)(?:\.git)?\/?$/i;
 
@@ -158,6 +163,25 @@ export async function createAssignment(
       })
       .where(eq(assignments.id, row.id));
   }
+
+  // Fetch the final row (after the fork flow) so the email reflects the
+  // actual status + forkUrl rather than the pending placeholder.
+  const [finalRow] = await db
+    .select()
+    .from(assignments)
+    .where(eq(assignments.id, row.id))
+    .limit(1);
+
+  await sendAssignmentCreatedEmail({
+    to: user.email,
+    assignmentId: row.id,
+    inviteUrl: `${portalUrl}/invite/${sid}/${token}`,
+    sourceRepo: stripGithubPrefix(parsed.data.repoUrl),
+    forkUrl: finalRow?.forkUrl ?? null,
+    seniorityLabel: seniorityLabel(parsed.data.seniority),
+    shortId: sid,
+    expiresAt: finalRow?.expiresAt ?? null,
+  });
 
   redirect(`/assignments/${row.id}`);
 }

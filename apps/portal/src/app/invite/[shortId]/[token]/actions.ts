@@ -3,9 +3,14 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
-import { getDb, assignments, candidates } from '@merged/db';
+import { getDb, assignments, candidates, users } from '@merged/db';
 import { inviteCollaborator } from '@merged/github-app';
 import { getGitHubClient } from '@/lib/github';
+import {
+  sendCandidateAcceptedEmail,
+  seniorityLabel,
+  stripGithubPrefix,
+} from '@/lib/email';
 
 const GH_USERNAME = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
 
@@ -80,17 +85,39 @@ export async function acceptInvite(
     }
   }
 
-  await db.insert(candidates).values({
-    assignmentId: assignment.id,
-    email: parsed.data.email || null,
-    githubUsername: parsed.data.githubUsername,
-    invitedAt: new Date(),
-  });
+  const [candidateRow] = await db
+    .insert(candidates)
+    .values({
+      assignmentId: assignment.id,
+      email: parsed.data.email || null,
+      githubUsername: parsed.data.githubUsername,
+      invitedAt: new Date(),
+    })
+    .returning({ id: candidates.id });
 
   await db
     .update(assignments)
     .set({ status: 'in_progress' })
     .where(eq(assignments.id, assignment.id));
+
+  const [hr] = await db
+    .select({ email: users.email })
+    .from(users)
+    .where(eq(users.id, assignment.hrUserId))
+    .limit(1);
+
+  if (hr?.email && candidateRow?.id) {
+    await sendCandidateAcceptedEmail({
+      to: hr.email,
+      assignmentId: assignment.id,
+      candidateId: candidateRow.id,
+      githubUsername: parsed.data.githubUsername,
+      candidateEmail: parsed.data.email || null,
+      sourceRepo: stripGithubPrefix(assignment.sourceRepoUrl),
+      seniorityLabel: seniorityLabel(assignment.seniority),
+      shortId: assignment.shortId,
+    });
+  }
 
   redirect(`/invite/${parsed.data.shortId}/${parsed.data.token}`);
 }

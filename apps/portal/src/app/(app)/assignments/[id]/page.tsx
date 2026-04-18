@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { getDb, assignments, submissions } from '@merged/db';
 import { requireUser } from '@/lib/session';
 import { CopyButton } from './CopyButton';
+import { DeleteButton } from './DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,12 +53,12 @@ export default async function AssignmentDetail({
 
   return (
     <div>
-      <Link href="/" className="text-sm text-ink-muted hover:text-ink mb-4 inline-block">
+      <Link href="/assignments" className="text-sm text-ink-muted hover:text-ink mb-4 inline-block">
         ← Усі задачі
       </Link>
 
-      <div className="flex items-start justify-between mb-8">
-        <div>
+      <div className="flex items-start justify-between gap-6 mb-8">
+        <div className="min-w-0">
           <div className="label-mono text-ink-muted mb-2">
             Задача · {row.shortId}
           </div>
@@ -73,6 +74,14 @@ export default async function AssignmentDetail({
               {STATUS_LABEL[row.status] ?? row.status}
             </span>
           </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href={`/assignments/${row.id}/edit`}
+            className="h-9 inline-flex items-center px-3 rounded-md border border-ink/10 bg-surface text-ink text-sm hover:bg-surface-dim transition"
+          >
+            Редагувати
+          </Link>
         </div>
       </div>
 
@@ -116,6 +125,14 @@ export default async function AssignmentDetail({
               Дійсне до {row.expiresAt.toISOString().slice(0, 10)}
             </p>
           )}
+        </Card>
+
+        <Card title="Небезпечна зона">
+          <p className="text-sm text-ink-muted mb-3 leading-relaxed">
+            Видалення прибирає задачу з порталу і намагається видалити форк з organization{' '}
+            <span className="font-mono">{row.forkOwner}</span>. Посилання для кандидата після цього перестане працювати.
+          </p>
+          <DeleteButton id={row.id} shortRepo={stripGithubPrefix(row.sourceRepoUrl)} />
         </Card>
 
         <Card title="Сабміти">

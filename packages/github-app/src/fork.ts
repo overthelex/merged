@@ -194,6 +194,84 @@ export async function seedAssessmentBranch(
   return { branch, sha: commit.sha };
 }
 
+/**
+ * Best-effort delete of a fork. Throws on failure — callers decide whether to
+ * swallow and still continue with portal-side cleanup.
+ */
+export async function deleteRepo(
+  client: AppClient,
+  forkName: string,
+): Promise<void> {
+  const octokit = await client.getInstallationOctokit();
+  await octokit.request('DELETE /repos/{owner}/{repo}', {
+    owner: client.forkOrg,
+    repo: forkName,
+  });
+}
+
+/**
+ * Update ASSIGNMENT.md on the `merged/assessment` branch with new content.
+ * Used when the HR edits task parameters (e.g. seniority) so the markdown the
+ * candidate sees stays in sync with the portal.
+ */
+export async function updateAssessmentAssignmentMarkdown(
+  client: AppClient,
+  forkName: string,
+  assignmentMarkdown: string,
+): Promise<{ sha: string }> {
+  const octokit = await client.getInstallationOctokit();
+  const branch = 'merged/assessment';
+
+  const { data: ref } = await octokit.request(
+    'GET /repos/{owner}/{repo}/git/ref/{ref}',
+    { owner: client.forkOrg, repo: forkName, ref: `heads/${branch}` },
+  );
+  const parentSha = ref.object.sha;
+
+  const { data: parentCommit } = await octokit.request(
+    'GET /repos/{owner}/{repo}/git/commits/{commit_sha}',
+    { owner: client.forkOrg, repo: forkName, commit_sha: parentSha },
+  );
+
+  const { data: tree } = await octokit.request(
+    'POST /repos/{owner}/{repo}/git/trees',
+    {
+      owner: client.forkOrg,
+      repo: forkName,
+      base_tree: parentCommit.tree.sha,
+      tree: [
+        {
+          path: 'ASSIGNMENT.md',
+          mode: '100644',
+          type: 'blob',
+          content: assignmentMarkdown,
+        },
+      ],
+    },
+  );
+
+  const { data: commit } = await octokit.request(
+    'POST /repos/{owner}/{repo}/git/commits',
+    {
+      owner: client.forkOrg,
+      repo: forkName,
+      message: 'chore(merged): update assessment parameters',
+      tree: tree.sha,
+      parents: [parentSha],
+    },
+  );
+
+  await octokit.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
+    owner: client.forkOrg,
+    repo: forkName,
+    ref: `heads/${branch}`,
+    sha: commit.sha,
+    force: false,
+  });
+
+  return { sha: commit.sha };
+}
+
 export async function inviteCollaborator(
   client: AppClient,
   forkName: string,
