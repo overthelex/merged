@@ -27,6 +27,12 @@ export function Footer() {
             >
               hello@merged.legal.org.ua
             </a>
+            <a
+              href="/blog/"
+              className="font-mono text-sm text-ink/55 hover:text-ink transition-colors duration-150 focus-visible:underline"
+            >
+              Блог
+            </a>
           </div>
 
           {/* Legal */}
