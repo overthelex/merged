@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import {
   inviteCandidate,
@@ -9,8 +9,15 @@ import {
 
 const INITIAL: InviteCandidateState = { ok: true };
 
-export function InviteCandidateForm({ id }: { id: string }) {
+export function InviteCandidateForm({
+  id,
+  emailSuggestions = [],
+}: {
+  id: string;
+  emailSuggestions?: string[];
+}) {
   const [state, action] = useFormState(inviteCandidate, INITIAL);
+  const suggestionsListId = useId();
   const [email, setEmail] = useState('');
   const [note, setNote] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
@@ -56,11 +63,19 @@ export function InviteCandidateForm({ id }: { id: string }) {
           type="email"
           required
           autoComplete="off"
+          list={emailSuggestions.length > 0 ? suggestionsListId : undefined}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="candidate@example.com"
           className="w-full h-10 px-3 rounded-md border border-ink/10 bg-surface text-ink placeholder:text-ink-muted/60 focus:outline-none focus:border-ink/40 font-mono text-sm"
         />
+        {emailSuggestions.length > 0 && (
+          <datalist id={suggestionsListId}>
+            {emailSuggestions.map((suggestion) => (
+              <option key={suggestion} value={suggestion} />
+            ))}
+          </datalist>
+        )}
         {state.fieldErrors?.email && (
           <div className="text-xs text-red-700 mt-1">{state.fieldErrors.email}</div>
         )}
