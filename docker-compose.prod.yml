@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: merged-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: merged
+      POSTGRES_DB: merged
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - /home/ubuntu/merged/secrets/postgres_password:/run/secrets/postgres_password:ro
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U merged -d merged"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   landing:
     image: ghcr.io/overthelex/merged-landing:latest
     container_name: merged-landing
@@ -11,16 +30,16 @@ services:
       timeout: 5s
       retries: 3
 
-  # portal:
-  #   image: ghcr.io/overthelex/merged-portal:latest
-  #   container_name: merged-portal
-  #   restart: unless-stopped
-  #   env_file: /home/ubuntu/merged/.env.portal
-  #   expose:
-  #     - "3000"
-  #   depends_on:
-  #     - postgres
-  #     - redis
+  portal:
+    image: ghcr.io/overthelex/merged-portal:latest
+    container_name: merged-portal
+    restart: unless-stopped
+    env_file: /home/ubuntu/merged/.env.portal
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   caddy:
     image: caddy:2-alpine
@@ -36,7 +55,9 @@ services:
       - /var/log/caddy:/var/log/caddy
     depends_on:
       - landing
+      - portal
 
 volumes:
   caddy_data:
   caddy_config:
+  pg_data:

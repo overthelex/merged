@@ -12,6 +12,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   LANDING_IMAGE: ghcr.io/overthelex/merged-landing
+  PORTAL_IMAGE: ghcr.io/overthelex/merged-portal
   EC2_HOST: 18.196.127.148
   EC2_USER: ubuntu
   SSH_KEY: ~/.ssh/merged-key.pem
@@ -37,8 +38,62 @@ jobs:
           docker push $LANDING_IMAGE:${{ github.sha }}
           docker push $LANDING_IMAGE:latest
 
-  deploy:
+      - name: Build and push portal image
+        run: |
+          docker build \
+            -t $PORTAL_IMAGE:${{ github.sha }} \
+            -t $PORTAL_IMAGE:latest \
+            -f apps/portal/Dockerfile .
+          docker push $PORTAL_IMAGE:${{ github.sha }}
+          docker push $PORTAL_IMAGE:latest
+
+  migrate:
     needs: build
+    runs-on: [self-hosted, merged]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run migrations on EC2
+        run: |
+          scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
+            -r packages/db $EC2_USER@$EC2_HOST:/home/ubuntu/merged/db-migrations-staging
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          set -euo pipefail
+          cd /home/ubuntu/merged
+
+          # Use the repo's migrations folder (pregenerated in git) if present;
+          # otherwise rely on drizzle's generate+migrate inside the staging dir
+          if [ -d db-migrations-staging/migrations ]; then
+            sudo docker run --rm \
+              --network merged_default \
+              -v "$PWD/db-migrations-staging":/work \
+              -w /work \
+              -e DATABASE_URL=postgres://merged:"$(cat secrets/postgres_password)"@merged-postgres:5432/merged \
+              node:20-alpine sh -c '
+                corepack enable >/dev/null 2>&1 || true
+                npm i --silent drizzle-orm@0.36.4 postgres@3.4.5 >/dev/null
+                node -e "
+                  const postgres = require(\"postgres\");
+                  const { drizzle } = require(\"drizzle-orm/postgres-js\");
+                  const { migrate } = require(\"drizzle-orm/postgres-js/migrator\");
+                  (async () => {
+                    const client = postgres(process.env.DATABASE_URL, { max: 1 });
+                    const db = drizzle(client);
+                    await migrate(db, { migrationsFolder: \"./migrations\" });
+                    await client.end();
+                    console.log(\"migrations applied\");
+                  })();
+                "
+              '
+          else
+            echo "no migrations/ dir in packages/db — skipping"
+          fi
+          rm -rf db-migrations-staging
+          EOF
+
+  deploy:
+    needs: migrate
     runs-on: [self-hosted, merged]
 
     steps:
@@ -48,11 +103,34 @@ jobs:
       - name: Sync config to EC2
         run: |
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            'mkdir -p /home/ubuntu/merged'
+            'mkdir -p /home/ubuntu/merged /home/ubuntu/merged/secrets'
           scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
             docker-compose.prod.yml $EC2_USER@$EC2_HOST:/home/ubuntu/merged/docker-compose.prod.yml
           scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
             infra/Caddyfile $EC2_USER@$EC2_HOST:/home/ubuntu/merged/Caddyfile
+
+      - name: Ensure secrets + env on EC2
+        run: |
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          set -euo pipefail
+          cd /home/ubuntu/merged
+
+          # Generate postgres password once, persist
+          if [ ! -f secrets/postgres_password ]; then
+            head -c 24 /dev/urandom | base64 | tr -d '=+/' > secrets/postgres_password
+            chmod 600 secrets/postgres_password
+          fi
+
+          # Portal env — rewrite every deploy (contains DATABASE_URL)
+          PG_PW=$(cat secrets/postgres_password)
+          cat > .env.portal <<ENV
+          NODE_ENV=production
+          DATABASE_URL=postgres://merged:${PG_PW}@merged-postgres:5432/merged
+          PUBLIC_BASE_URL=https://merged.legal.org.ua
+          APP_VERSION=${{ github.sha }}
+          ENV
+          chmod 600 .env.portal
+          EOF
 
       - name: Deploy on EC2
         run: |
@@ -60,25 +138,24 @@ jobs:
           set -euo pipefail
           cd /home/ubuntu/merged
 
-          # First deploy: stop the bootstrap host Caddy so container can bind 80/443
           if systemctl is-active --quiet caddy; then
             sudo systemctl stop caddy
             sudo systemctl disable caddy
           fi
 
-          # Login to GHCR on the EC2 to pull private image
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
           sudo docker pull ghcr.io/overthelex/merged-landing:latest
+          sudo docker pull ghcr.io/overthelex/merged-portal:latest
           sudo docker compose -f docker-compose.prod.yml up -d
           sudo docker image prune -f
           EOF
 
       - name: Health check
         run: |
-          sleep 10
-          # Test landing container directly (bypass Caddy's 308 http→https redirect)
+          sleep 15
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            'sudo docker exec merged-landing wget -qO- http://localhost:8080/ | grep -qi "merged" && echo "landing healthy" || (echo "FAILED" && sudo docker logs --tail=50 merged-caddy merged-landing && exit 1)'
-          # Test public endpoint via Cloudflare
-          curl -sSf https://merged.legal.org.ua/ | grep -qi "технічний скринінг" && echo "public endpoint healthy"
+            'sudo docker exec merged-landing wget -qO- http://localhost:8080/ | grep -qi "merged" && echo "landing healthy"'
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+            'sudo docker exec merged-portal wget -qO- http://localhost:3000/api/health | grep -q "\"status\":\"ok\"" && echo "portal healthy"'
+          curl -sSf https://merged.legal.org.ua/ | grep -qi "технічний скринінг" && echo "landing public endpoint healthy"
+          curl -sSf https://app.merged.legal.org.ua/api/health | grep -q '"status":"ok"' && echo "portal public endpoint healthy"
