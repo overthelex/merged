@@ -21,7 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://merged.legal.org.ua'),
+  metadataBase: new URL('https://merged.com.ua'),
   title: {
     default: 'merged — технічний скринінг без співбесід',
     template: '%s · merged',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'uk_UA',
-    url: 'https://merged.legal.org.ua',
+    url: 'https://merged.com.ua',
     siteName: 'merged',
   },
   robots: { index: true, follow: true },

@@ -2,7 +2,7 @@
 
 import { useState, useId } from 'react';
 
-const PORTAL = process.env.NEXT_PUBLIC_PORTAL_BASE_URL ?? 'https://portal.legal.org.ua';
+const PORTAL = process.env.NEXT_PUBLIC_PORTAL_BASE_URL ?? 'https://portal.merged.com.ua';
 
 type Status = 'idle' | 'sending' | 'ok' | 'err';
 

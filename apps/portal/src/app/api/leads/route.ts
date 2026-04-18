@@ -6,7 +6,14 @@ import { getDb, leads } from '@merged/db';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const LANDING_ORIGIN = process.env.PUBLIC_BASE_URL ?? 'https://merged.legal.org.ua';
+// Accept multiple landing origins — new primary + legacy. Comma-separated.
+const ALLOWED_ORIGINS = (
+  process.env.PUBLIC_BASE_URL ?? 'https://merged.com.ua,https://merged.legal.org.ua'
+)
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const PRIMARY_ORIGIN = ALLOWED_ORIGINS[0]!;
 
 const LeadSchema = z.object({
   email: z.string().email().max(320),
@@ -18,7 +25,7 @@ const LeadSchema = z.object({
 });
 
 function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin === LANDING_ORIGIN ? origin : LANDING_ORIGIN;
+  const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : PRIMARY_ORIGIN;
   return {
     'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
