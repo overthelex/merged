@@ -14,7 +14,7 @@ const nextConfig = {
     serverActions: { bodySizeLimit: '2mb' },
   },
   // @merged/db is a workspace package with raw TS — Next needs to transpile it
-  transpilePackages: ['@merged/db'],
+  transpilePackages: ['@merged/db', '@merged/github-app'],
 };
 
 export default nextConfig;
