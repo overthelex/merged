@@ -9,8 +9,8 @@ export default function NewAssignmentPage() {
         Нова задача
       </h1>
       <p className="text-ink-muted text-sm mb-8 max-w-xl">
-        Вкажіть репозиторій компанії, яку ви представляєте, і рівень позиції. Ми створимо приватний форк під organization{' '}
-        <span className="font-mono">overthelex</span> і видамо посилання для кандидата.
+        Вкажіть репозиторій компанії, яку ви представляєте, і рівень позиції. Ми створимо форк під organization{' '}
+        <span className="font-mono">imerged</span> (приватний, якщо вихідне репо приватне) і видамо посилання для кандидата.
       </p>
       <div className="max-w-2xl">
         <NewAssignmentForm />

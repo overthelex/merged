@@ -66,14 +66,31 @@ export async function forkRepo(
   if (!fork) throw new Error(`Fork ${client.forkOrg}/${forkName} did not become available within 60s`);
 
   if (!fork.private) {
-    await octokit.request('PATCH /repos/{owner}/{repo}', {
-      owner: client.forkOrg,
-      repo: forkName,
-      private: true,
-      has_issues: false,
-      has_wiki: false,
-      has_projects: false,
-    });
+    try {
+      await octokit.request('PATCH /repos/{owner}/{repo}', {
+        owner: client.forkOrg,
+        repo: forkName,
+        private: true,
+        has_issues: false,
+        has_wiki: false,
+        has_projects: false,
+      });
+    } catch (err) {
+      // Forks of public upstreams cannot be made private via the API —
+      // GitHub returns 422 "Public forks can't be made private". Fall back
+      // to just disabling issues/wiki/projects so the fork stays tidy.
+      if (err instanceof RequestError && err.status === 422) {
+        await octokit.request('PATCH /repos/{owner}/{repo}', {
+          owner: client.forkOrg,
+          repo: forkName,
+          has_issues: false,
+          has_wiki: false,
+          has_projects: false,
+        });
+      } else {
+        throw err;
+      }
+    }
   }
 
   return {
