@@ -7,6 +7,7 @@ import {
   sendEmail,
   renderWelcome,
   renderAssignmentCreated,
+  renderCandidateInvite,
   renderCandidateAccepted,
   renderSubmissionReceived,
   renderSubmissionScored,
@@ -90,6 +91,58 @@ export async function sendAssignmentCreatedEmail(input: {
     expiresAt: input.expiresAt,
   });
   await safeSend('assignment_created', input.to, rendered);
+}
+
+export async function sendCandidateInviteEmail(input: {
+  to: string;
+  inviteUrl: string;
+  sourceRepo: string;
+  seniorityLabel: string;
+  shortId: string;
+  hrName: string | null;
+  hrEmail: string | null;
+  companyName: string | null;
+  expiresAt: Date | null;
+  personalNote: string | null;
+}): Promise<{ sent: boolean; reason?: string }> {
+  const cfg = config();
+  const rendered = renderCandidateInvite({
+    brandUrl: cfg?.brandUrl ?? 'https://merged.com.ua',
+    logoUrl:
+      cfg?.logoUrl ?? 'https://portal.merged.com.ua/brand/logo-ink-128.png',
+    inviteUrl: input.inviteUrl,
+    sourceRepo: input.sourceRepo,
+    seniorityLabel: input.seniorityLabel,
+    shortId: input.shortId,
+    hrName: input.hrName,
+    hrEmail: input.hrEmail,
+    companyName: input.companyName,
+    expiresAt: input.expiresAt,
+    personalNote: input.personalNote,
+  });
+  // Unlike the fire-and-forget safeSend, this one reports back so the UI can
+  // tell the HR whether their invite actually went out.
+  try {
+    const result = await sendEmail(config(), {
+      to: input.to,
+      subject: rendered.subject,
+      html: rendered.html,
+      replyTo: input.hrEmail ?? undefined,
+    });
+    if (result.ok) {
+      console.info('[email] sent', { label: 'candidate_invite', id: result.id });
+      return { sent: true };
+    }
+    if ('skipped' in result && result.skipped) {
+      console.info('[email] skip', { label: 'candidate_invite', reason: result.reason });
+      return { sent: false, reason: result.reason };
+    }
+    console.error('[email] send failed', { label: 'candidate_invite', error: result.error });
+    return { sent: false, reason: result.error };
+  } catch (err) {
+    console.error('[email] send threw', { label: 'candidate_invite', err });
+    return { sent: false, reason: 'Помилка при надсиланні листа.' };
+  }
 }
 
 export async function sendCandidateAcceptedEmail(input: {

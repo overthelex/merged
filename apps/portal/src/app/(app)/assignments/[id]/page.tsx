@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { and, eq } from 'drizzle-orm';
-import { getDb, assignments, submissions } from '@merged/db';
+import { and, desc, eq } from 'drizzle-orm';
+import { getDb, assignments, candidates, submissions } from '@merged/db';
 import { requireUser } from '@/lib/session';
 import { CopyButton } from './CopyButton';
 import { DeleteButton } from './DeleteButton';
+import { InviteCandidateForm } from './InviteCandidateForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,13 +43,24 @@ export default async function AssignmentDetail({
 
   if (!row) notFound();
 
-  const subs = await db
-    .select()
-    .from(submissions)
-    .where(eq(submissions.assignmentId, row.id))
-    .limit(20);
+  const [subs, invited] = await Promise.all([
+    db
+      .select()
+      .from(submissions)
+      .where(eq(submissions.assignmentId, row.id))
+      .limit(20),
+    db
+      .select()
+      .from(candidates)
+      .where(eq(candidates.assignmentId, row.id))
+      .orderBy(desc(candidates.invitedAt))
+      .limit(20),
+  ]);
 
-  const baseUrl = process.env.PUBLIC_BASE_URL ?? 'https://merged.com.ua';
+  // PUBLIC_BASE_URL may be a comma-separated list (apex + portal host). Use
+  // the first entry so the URL we render/copy is actually valid.
+  const baseUrl =
+    process.env.PUBLIC_BASE_URL?.split(',')[0]?.trim() ?? 'https://merged.com.ua';
   const inviteUrl = `${baseUrl}/invite/${row.shortId}/${row.inviteToken}`;
 
   return (
@@ -112,18 +124,65 @@ export default async function AssignmentDetail({
 
         <Card title="Запрошення для кандидата">
           <p className="text-sm text-ink-muted mb-3 leading-relaxed">
-            Надішліть це посилання разом із access key (якщо репо приватне) на e-mail кандидата. Посилання одноразово привʼязує GitHub-акаунт кандидата до форку.
+            Введіть e-mail кандидата — ми надішлемо фірмовий лист із посиланням. Посилання одноразово привʼязує GitHub-акаунт кандидата до форку.
           </p>
-          <div className="flex items-center gap-2 rounded-md border border-ink/10 bg-surface-dim px-3 py-2">
-            <code className="flex-1 truncate font-mono text-xs text-ink">
-              {inviteUrl}
-            </code>
-            <CopyButton value={inviteUrl} />
+          <InviteCandidateForm id={row.id} />
+
+          <div className="mt-5 pt-5 border-t border-ink/5">
+            <div className="label-mono text-ink-muted mb-2">
+              Посилання {row.sourceRepoPrivate ? '(потрібен access key)' : ''}
+            </div>
+            <div className="flex items-center gap-2 rounded-md border border-ink/10 bg-surface-dim px-3 py-2">
+              <code className="flex-1 truncate font-mono text-xs text-ink">
+                {inviteUrl}
+              </code>
+              <CopyButton value={inviteUrl} />
+            </div>
+            {row.expiresAt && (
+              <p className="text-xs text-ink-muted mt-2 tabular">
+                Дійсне до {row.expiresAt.toISOString().slice(0, 10)}
+              </p>
+            )}
           </div>
-          {row.expiresAt && (
-            <p className="text-xs text-ink-muted mt-3 tabular">
-              Дійсне до {row.expiresAt.toISOString().slice(0, 10)}
-            </p>
+
+          {invited.length > 0 && (
+            <div className="mt-5 pt-5 border-t border-ink/5">
+              <div className="label-mono text-ink-muted mb-3">
+                Історія запрошень
+              </div>
+              <ul className="divide-y divide-ink/5 text-sm">
+                {invited.map((c) => (
+                  <li
+                    key={c.id}
+                    className="py-2 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-mono text-xs text-ink truncate">
+                        {c.email ?? '—'}
+                      </div>
+                      {c.githubUsername && (
+                        <div className="text-xs text-ink-muted truncate">
+                          GitHub: @{c.githubUsername}
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0 text-right text-xs tabular">
+                      {c.acceptedAt ? (
+                        <span className="text-emerald-700">
+                          Прийняв · {c.acceptedAt.toISOString().slice(0, 10)}
+                        </span>
+                      ) : c.invitedAt ? (
+                        <span className="text-ink-muted">
+                          Надіслано · {c.invitedAt.toISOString().slice(0, 10)}
+                        </span>
+                      ) : (
+                        <span className="text-ink-muted">—</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </Card>
 
