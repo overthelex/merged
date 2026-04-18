@@ -8,6 +8,7 @@ import { getDb, assignments, type Seniority } from '@merged/db';
 import { updateAssessmentAssignmentMarkdown } from '@merged/github-app';
 import { requireUser } from '@/lib/session';
 import { getGitHubClient } from '@/lib/github';
+import { getPortalUrl } from '@/lib/urls';
 import { renderAssignmentMarkdown } from '@/lib/assignmentTemplate';
 
 const Schema = z.object({
@@ -62,8 +63,7 @@ export async function updateAssignment(
 
     const gh = getGitHubClient();
     if (gh && row.forkName && row.status !== 'pending_fork') {
-      const portalUrl =
-        process.env.PUBLIC_BASE_URL?.split(',')[0]?.trim() ?? 'https://merged.com.ua';
+      const portalUrl = getPortalUrl();
       try {
         await updateAssessmentAssignmentMarkdown(
           gh,

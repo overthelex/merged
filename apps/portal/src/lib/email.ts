@@ -13,6 +13,7 @@ import {
   renderSubmissionScored,
   type SendResult,
 } from '@merged/email';
+import { getPortalUrl } from './urls';
 
 let _cfg: ReturnType<typeof readEmailConfigFromEnv> | undefined;
 
@@ -22,8 +23,7 @@ function config() {
 }
 
 function portalUrl(): string {
-  const raw = process.env.PUBLIC_BASE_URL?.split(',')[0]?.trim();
-  return raw ?? 'https://portal.merged.com.ua';
+  return getPortalUrl();
 }
 
 async function safeSend(

@@ -6,6 +6,7 @@ import { requireUser } from '@/lib/session';
 import { CopyButton } from './CopyButton';
 import { DeleteButton } from './DeleteButton';
 import { InviteCandidateForm } from './InviteCandidateForm';
+import { getPortalUrl } from '@/lib/urls';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,11 +58,7 @@ export default async function AssignmentDetail({
       .limit(20),
   ]);
 
-  // PUBLIC_BASE_URL may be a comma-separated list (apex + portal host). Use
-  // the first entry so the URL we render/copy is actually valid.
-  const baseUrl =
-    process.env.PUBLIC_BASE_URL?.split(',')[0]?.trim() ?? 'https://merged.com.ua';
-  const inviteUrl = `${baseUrl}/invite/${row.shortId}/${row.inviteToken}`;
+  const inviteUrl = `${getPortalUrl()}/invite/${row.shortId}/${row.inviteToken}`;
 
   return (
     <div>

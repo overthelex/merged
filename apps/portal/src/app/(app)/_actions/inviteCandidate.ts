@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb, assignments, candidates, companies } from '@merged/db';
 import { requireUser } from '@/lib/session';
+import { getPortalUrl } from '@/lib/urls';
 import {
   sendCandidateInviteEmail,
   seniorityLabel,
@@ -60,9 +61,7 @@ export async function inviteCandidate(
     ? await db.select().from(companies).where(eq(companies.id, row.companyId)).limit(1)
     : [];
 
-  const baseUrl =
-    process.env.PUBLIC_BASE_URL?.split(',')[0]?.trim() ?? 'https://merged.com.ua';
-  const inviteUrl = `${baseUrl}/invite/${row.shortId}/${row.inviteToken}`;
+  const inviteUrl = `${getPortalUrl()}/invite/${row.shortId}/${row.inviteToken}`;
 
   const note = parsed.data.note && parsed.data.note.length > 0 ? parsed.data.note : null;
 

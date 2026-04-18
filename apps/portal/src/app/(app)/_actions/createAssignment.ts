@@ -19,6 +19,7 @@ import {
 import { requireUser } from '@/lib/session';
 import { shortId, inviteToken } from '@/lib/shortId';
 import { getGitHubClient, getForkOrg } from '@/lib/github';
+import { getPortalUrl } from '@/lib/urls';
 import {
   renderAssignmentMarkdown,
   renderRunnerScript,
@@ -96,7 +97,7 @@ export async function createAssignment(
   const forkName = `merged_developers-${sid}`;
   const forkOrg = getForkOrg();
   const token = inviteToken();
-  const portalUrl = process.env.PUBLIC_BASE_URL?.split(',')[0]?.trim() ?? 'https://merged.com.ua';
+  const portalUrl = getPortalUrl();
 
   // Persist a pending_fork row first — we can retry the GitHub side later if it fails.
   const insertedAssignment = await db
