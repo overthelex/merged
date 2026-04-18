@@ -72,6 +72,9 @@ importers:
       '@merged/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@merged/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@merged/github-app':
         specifier: workspace:*
         version: link:../../packages/github-app
@@ -137,6 +140,15 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
+  packages/email:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.9.0
+        version: 22.19.17
       typescript:
         specifier: ^5.6.3
         version: 5.9.3

@@ -2,6 +2,7 @@
 
 import { useFormState, useFormStatus } from 'react-dom';
 import type { AcceptInviteState } from './actions';
+import { ProgressOverlay, type ProgressStep } from '@/components/ProgressOverlay';
 
 const INITIAL: AcceptInviteState = { ok: true };
 
@@ -23,6 +24,7 @@ export function AcceptForm({
       action={formAction}
       className="rounded-xl border border-ink/5 bg-surface p-5 shadow-card space-y-4"
     >
+      <InvitePendingOverlay />
       <input type="hidden" name="shortId" value={shortId} />
       <input type="hidden" name="token" value={token} />
 
@@ -59,6 +61,38 @@ export function AcceptForm({
 
       <SubmitButton forkUrlHint={forkUrl} />
     </form>
+  );
+}
+
+const INVITE_STEPS: ProgressStep[] = [
+  {
+    label: 'Перевіряємо посилання',
+    durationMs: 600,
+  },
+  {
+    label: 'Запрошуємо вас як collaborator у форк',
+    hint: 'GitHub надішле запрошення на ваш акаунт.',
+    durationMs: 3000,
+  },
+  {
+    label: 'Фіксуємо кандидата в задачі',
+    durationMs: 800,
+  },
+  {
+    label: 'Повідомляємо рекрутера',
+    durationMs: 1200,
+  },
+];
+
+function InvitePendingOverlay() {
+  const { pending } = useFormStatus();
+  return (
+    <ProgressOverlay
+      show={pending}
+      title="Приймаємо запрошення…"
+      steps={INVITE_STEPS}
+      footer="Після цього перевірте пошту — GitHub надішле лист з кнопкою Accept."
+    />
   );
 }
 

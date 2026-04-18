@@ -5,12 +5,18 @@ import {
   assignments,
   submissions,
   candidates,
+  users,
 } from '@merged/db';
 import {
   verifyAndParseWebhook,
   WebhookError,
   readGitHubAppConfigFromEnv,
 } from '@merged/github-app';
+import {
+  sendSubmissionReceivedEmail,
+  seniorityLabel,
+  stripGithubPrefix,
+} from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -72,6 +78,7 @@ type PullRequestEvent = {
   action: string;
   pull_request: {
     number: number;
+    html_url?: string;
     head: { sha: string; ref: string };
     base: { ref: string };
     user?: { login: string };
@@ -79,6 +86,7 @@ type PullRequestEvent = {
   repository: {
     owner: { login: string };
     name: string;
+    html_url?: string;
   };
 };
 
@@ -130,7 +138,8 @@ async function handlePullRequest(e: PullRequestEvent): Promise<void> {
     )
     .limit(1);
 
-  if (existing.length === 0) {
+  const isNewSubmission = existing.length === 0;
+  if (isNewSubmission) {
     await db.insert(submissions).values({
       assignmentId: assignment.id,
       candidateId,
@@ -151,5 +160,33 @@ async function handlePullRequest(e: PullRequestEvent): Promise<void> {
       .update(assignments)
       .set({ status: 'submitted' })
       .where(eq(assignments.id, assignment.id));
+  }
+
+  // Email the HR on first submission per PR. Skip sync-only updates (PR
+  // pushed more commits) to avoid spamming.
+  if (isNewSubmission && e.action === 'opened') {
+    const [hr] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, assignment.hrUserId))
+      .limit(1);
+
+    if (hr?.email) {
+      const prUrl =
+        e.pull_request.html_url ??
+        `${e.repository.html_url ?? `https://github.com/${repoOwner}/${repoName}`}/pull/${e.pull_request.number}`;
+
+      await sendSubmissionReceivedEmail({
+        to: hr.email,
+        assignmentId: assignment.id,
+        prUrl,
+        prNumber: e.pull_request.number,
+        prHeadShaShort: e.pull_request.head.sha.slice(0, 7),
+        githubUsername: candidateLogin ?? null,
+        sourceRepo: stripGithubPrefix(assignment.sourceRepoUrl),
+        seniorityLabel: seniorityLabel(assignment.seniority),
+        shortId: assignment.shortId,
+      });
+    }
   }
 }

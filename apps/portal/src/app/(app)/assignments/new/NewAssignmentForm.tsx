@@ -7,6 +7,7 @@ import {
   createAssignment,
   type CreateAssignmentState,
 } from '../../_actions/createAssignment';
+import { ProgressOverlay, type ProgressStep } from '@/components/ProgressOverlay';
 
 const INITIAL: CreateAssignmentState = { ok: true };
 
@@ -41,6 +42,7 @@ export function NewAssignmentForm() {
 
   return (
     <form action={action} className="space-y-8">
+      <ForkPendingOverlay />
       <StepHeader step={step} />
 
       {state.message && !state.ok && (
@@ -280,5 +282,43 @@ function SubmitButton() {
     >
       {pending ? 'Створюємо…' : 'Створити задачу'}
     </button>
+  );
+}
+
+const FORK_STEPS: ProgressStep[] = [
+  {
+    label: 'Форкуємо репозиторій',
+    hint: 'GitHub клонує джерело в нашу організацію — це найдовший етап.',
+    durationMs: 6000,
+  },
+  {
+    label: 'Налаштовуємо захист main-гілки',
+    hint: 'Щоб кандидат не міг напряму мержити у main.',
+    durationMs: 2500,
+  },
+  {
+    label: 'Готуємо assessment-гілку',
+    hint: 'Додаємо ASSIGNMENT.md і runner-скрипт.',
+    durationMs: 3000,
+  },
+  {
+    label: 'Записуємо задачу в базу',
+    durationMs: 800,
+  },
+  {
+    label: 'Надсилаємо лист із запрошенням',
+    durationMs: 1200,
+  },
+];
+
+function ForkPendingOverlay() {
+  const { pending } = useFormStatus();
+  return (
+    <ProgressOverlay
+      show={pending}
+      title="Створюємо задачу…"
+      steps={FORK_STEPS}
+      footer="Зазвичай це займає 10–20 секунд. Не закривайте вкладку."
+    />
   );
 }
