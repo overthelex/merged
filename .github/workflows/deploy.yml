@@ -83,7 +83,8 @@ jobs:
           cat > .env.portal <<ENV
           NODE_ENV=production
           DATABASE_URL=postgres://merged:\${PG_PW}@merged-postgres:5432/merged
-          PUBLIC_BASE_URL=https://merged.com.ua,https://merged.legal.org.ua
+          PUBLIC_BASE_URL=https://merged.com.ua
+          PORTAL_URL=https://portal.merged.com.ua
           APP_VERSION=${{ github.sha }}
           AUTH_URL=https://portal.merged.com.ua
           AUTH_TRUST_HOST=true
