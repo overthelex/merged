@@ -6,10 +6,8 @@ import { getDb, leads } from '@merged/db';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Accept multiple landing origins — new primary + legacy. Comma-separated.
-const ALLOWED_ORIGINS = (
-  process.env.PUBLIC_BASE_URL ?? 'https://merged.com.ua,https://merged.legal.org.ua'
-)
+// Comma-separated list of landing origins allowed to POST to /api/leads.
+const ALLOWED_ORIGINS = (process.env.PUBLIC_BASE_URL ?? 'https://merged.com.ua')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);

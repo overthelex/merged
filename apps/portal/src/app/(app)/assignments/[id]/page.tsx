@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import { getDb, assignments, candidates, submissions } from '@merged/db';
 import { requireUser } from '@/lib/session';
 import { CopyButton } from './CopyButton';
@@ -44,7 +44,7 @@ export default async function AssignmentDetail({
 
   if (!row) notFound();
 
-  const [subs, invited] = await Promise.all([
+  const [subs, invited, recentForHr] = await Promise.all([
     db
       .select()
       .from(submissions)
@@ -56,7 +56,25 @@ export default async function AssignmentDetail({
       .where(eq(candidates.assignmentId, row.id))
       .orderBy(desc(candidates.invitedAt))
       .limit(20),
+    db
+      .select({ email: candidates.email, invitedAt: candidates.invitedAt })
+      .from(candidates)
+      .innerJoin(assignments, eq(candidates.assignmentId, assignments.id))
+      .where(and(eq(assignments.hrUserId, user.id), isNotNull(candidates.email)))
+      .orderBy(desc(candidates.invitedAt))
+      .limit(200),
   ]);
+
+  const emailSuggestions: string[] = [];
+  {
+    const seen = new Set<string>();
+    for (const r of recentForHr) {
+      if (!r.email || seen.has(r.email)) continue;
+      seen.add(r.email);
+      emailSuggestions.push(r.email);
+      if (emailSuggestions.length >= 20) break;
+    }
+  }
 
   const inviteUrl = `${getPortalUrl()}/invite/${row.shortId}/${row.inviteToken}`;
 
@@ -123,7 +141,7 @@ export default async function AssignmentDetail({
           <p className="text-sm text-ink-muted mb-3 leading-relaxed">
             Введіть e-mail кандидата — ми надішлемо фірмовий лист із посиланням. Посилання одноразово привʼязує GitHub-акаунт кандидата до форку.
           </p>
-          <InviteCandidateForm id={row.id} />
+          <InviteCandidateForm id={row.id} emailSuggestions={emailSuggestions} />
 
           <div className="mt-5 pt-5 border-t border-ink/5">
             <div className="label-mono text-ink-muted mb-2">
