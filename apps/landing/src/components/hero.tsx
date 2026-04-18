@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
+const PORTAL = process.env.NEXT_PUBLIC_PORTAL_BASE_URL ?? 'https://portal.merged.com.ua';
+
 export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-ink/8">
@@ -49,10 +51,10 @@ export function Hero() {
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link
-                href="#zayavka"
+                href={PORTAL}
                 className="group inline-flex items-center gap-2 rounded-lg bg-ink px-5 py-3 text-sm font-medium text-paper shadow-card-md transition-all duration-150 hover:bg-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
               >
-                Запросити демо
+                Увійти в портал
                 <ArrowRight className="transition-transform duration-150 group-hover:translate-x-0.5" />
               </Link>
               <Link
@@ -62,6 +64,10 @@ export function Hero() {
                 Як це працює
               </Link>
             </div>
+
+            <p className="mt-4 label-mono text-ink/45">
+              для HR-менеджерів
+            </p>
 
             {/* Stat pills */}
             <div className="mt-10 flex flex-wrap gap-5">
