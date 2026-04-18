@@ -90,10 +90,10 @@ jobs:
           AUTH_SECRET=${{ secrets.AUTH_SECRET }}
           AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }}
           AUTH_GOOGLE_SECRET=${{ secrets.AUTH_GOOGLE_SECRET }}
-          GITHUB_APP_ID=${{ secrets.GITHUB_APP_ID }}
-          GITHUB_APP_PRIVATE_KEY=${{ secrets.GITHUB_APP_PRIVATE_KEY }}
-          GITHUB_APP_INSTALLATION_ID=${{ secrets.GITHUB_APP_INSTALLATION_ID }}
-          GITHUB_WEBHOOK_SECRET=${{ secrets.GITHUB_WEBHOOK_SECRET }}
+          GITHUB_APP_ID=${{ secrets.GH_APP_ID }}
+          GITHUB_APP_PRIVATE_KEY=${{ secrets.GH_APP_PRIVATE_KEY }}
+          GITHUB_APP_INSTALLATION_ID=${{ secrets.GH_APP_INSTALLATION_ID }}
+          GITHUB_WEBHOOK_SECRET=${{ secrets.GH_WEBHOOK_SECRET }}
           TASKS_ORG=imerged
           ENV
           chmod 600 .env.portal
