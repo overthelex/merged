@@ -11,9 +11,13 @@ const INITIAL: UpdateProfileState = { ok: true };
 export function ProfileForm({
   defaultName,
   email,
+  defaultContactEmail,
+  defaultPhone,
 }: {
   defaultName: string;
   email: string;
+  defaultContactEmail: string;
+  defaultPhone: string;
 }) {
   const [state, action] = useFormState(updateProfile, INITIAL);
 
@@ -48,7 +52,7 @@ export function ProfileForm({
       </label>
 
       <label className="block">
-        <div className="text-sm font-medium text-ink mb-1.5">E-mail</div>
+        <div className="text-sm font-medium text-ink mb-1.5">E-mail входу</div>
         <input
           type="email"
           value={email}
@@ -57,8 +61,41 @@ export function ProfileForm({
           className="w-full h-11 px-3 rounded-md border border-ink/10 bg-surface-dim text-ink-muted font-mono text-sm cursor-not-allowed"
         />
         <div className="text-xs text-ink-muted mt-1.5 leading-snug">
-          E-mail привʼязаний до GitHub-акаунту і змінюється через повторний вхід.
+          E-mail входу привʼязаний до GitHub-акаунту і змінюється через повторний вхід.
         </div>
+      </label>
+
+      <label className="block">
+        <div className="text-sm font-medium text-ink mb-1.5">Контактний e-mail</div>
+        <input
+          name="contactEmail"
+          type="email"
+          required
+          defaultValue={defaultContactEmail}
+          maxLength={320}
+          className="w-full h-11 px-3 rounded-md border border-ink/10 bg-surface text-ink focus:outline-none focus:border-ink/40 text-sm font-mono"
+        />
+        {state.fieldErrors?.contactEmail && (
+          <div className="text-xs text-red-700 mt-1.5">{state.fieldErrors.contactEmail}</div>
+        )}
+        <div className="text-xs text-ink-muted mt-1.5 leading-snug">
+          Куди надсилати робочі повідомлення та підтвердження.
+        </div>
+      </label>
+
+      <label className="block">
+        <div className="text-sm font-medium text-ink mb-1.5">Телефон</div>
+        <input
+          name="phone"
+          type="tel"
+          defaultValue={defaultPhone}
+          maxLength={32}
+          placeholder="+380 XX XXX XX XX"
+          className="w-full h-11 px-3 rounded-md border border-ink/10 bg-surface text-ink placeholder:text-ink-muted/60 focus:outline-none focus:border-ink/40 text-sm font-mono"
+        />
+        {state.fieldErrors?.phone && (
+          <div className="text-xs text-red-700 mt-1.5">{state.fieldErrors.phone}</div>
+        )}
       </label>
 
       <div className="flex justify-end">

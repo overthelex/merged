@@ -173,7 +173,7 @@ export async function createAssignment(
     .limit(1);
 
   await sendAssignmentCreatedEmail({
-    to: user.email,
+    to: user.contactEmail ?? user.email,
     assignmentId: row.id,
     inviteUrl: `${portalUrl}/invite/${sid}/${token}`,
     sourceRepo: stripGithubPrefix(parsed.data.repoUrl),

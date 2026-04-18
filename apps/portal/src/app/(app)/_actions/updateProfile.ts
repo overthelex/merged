@@ -6,8 +6,22 @@ import { eq } from 'drizzle-orm';
 import { getDb, users } from '@merged/db';
 import { requireUser } from '@/lib/session';
 
+const PHONE = /^[+]?[\d\s().-]{6,32}$/;
+
 const Schema = z.object({
   name: z.string().trim().min(1, 'Імʼя не може бути порожнім').max(120),
+  contactEmail: z
+    .string()
+    .trim()
+    .email('Некоректний e-mail')
+    .max(320),
+  phone: z
+    .string()
+    .trim()
+    .max(32)
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || PHONE.test(v), 'Некоректний телефон'),
 });
 
 export type UpdateProfileState = {
@@ -22,7 +36,11 @@ export async function updateProfile(
 ): Promise<UpdateProfileState> {
   const user = await requireUser();
 
-  const parsed = Schema.safeParse({ name: form.get('name') ?? '' });
+  const parsed = Schema.safeParse({
+    name: form.get('name') ?? '',
+    contactEmail: form.get('contactEmail') ?? '',
+    phone: form.get('phone') ?? '',
+  });
   if (!parsed.success) {
     const fieldErrors: UpdateProfileState['fieldErrors'] = {};
     for (const issue of parsed.error.issues) {
@@ -33,7 +51,14 @@ export async function updateProfile(
   }
 
   const db = getDb();
-  await db.update(users).set({ name: parsed.data.name }).where(eq(users.id, user.id));
+  await db
+    .update(users)
+    .set({
+      name: parsed.data.name,
+      contactEmail: parsed.data.contactEmail,
+      phone: parsed.data.phone ? parsed.data.phone : null,
+    })
+    .where(eq(users.id, user.id));
 
   revalidatePath('/settings');
   return { ok: true, message: 'Профіль оновлено.' };

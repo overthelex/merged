@@ -166,18 +166,19 @@ async function handlePullRequest(e: PullRequestEvent): Promise<void> {
   // pushed more commits) to avoid spamming.
   if (isNewSubmission && e.action === 'opened') {
     const [hr] = await db
-      .select({ email: users.email })
+      .select({ email: users.email, contactEmail: users.contactEmail })
       .from(users)
       .where(eq(users.id, assignment.hrUserId))
       .limit(1);
 
-    if (hr?.email) {
+    const hrRecipient = hr?.contactEmail ?? hr?.email ?? null;
+    if (hrRecipient) {
       const prUrl =
         e.pull_request.html_url ??
         `${e.repository.html_url ?? `https://github.com/${repoOwner}/${repoName}`}/pull/${e.pull_request.number}`;
 
       await sendSubmissionReceivedEmail({
-        to: hr.email,
+        to: hrRecipient,
         assignmentId: assignment.id,
         prUrl,
         prNumber: e.pull_request.number,
