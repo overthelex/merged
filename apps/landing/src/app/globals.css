@@ -2,19 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: 'Inter', 'Manrope', system-ui, sans-serif;
-  --font-display: 'Manrope', 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-}
+/* ─── Base ──────────────────────────────────────────────────────────── */
 
 html,
 body {
-  background: theme('colors.paper');
+  background: theme('colors.paper.DEFAULT');
   color: theme('colors.ink.DEFAULT');
-  font-feature-settings: 'ss01', 'cv11';
+  font-feature-settings: 'ss01', 'cv11', 'tnum';
 }
 
 ::selection {
   background: theme('colors.accent.soft');
+  color: theme('colors.ink.DEFAULT');
+}
+
+/* ─── Scroll ─────────────────────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Utility classes ────────────────────────────────────────────────── */
+
+@layer utilities {
+  /* Mono label used across sections: uppercase, tracked, small */
+  .label-mono {
+    @apply font-mono text-xs uppercase tracking-[0.25em] leading-none;
+  }
+
+  /* Consistent section container */
+  .section-inner {
+    @apply mx-auto max-w-6xl px-6;
+  }
+
+  /* Tabular numerics for scores / stats */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* Diff line colors */
+  .diff-add {
+    @apply text-accent;
+  }
+  .diff-del {
+    @apply text-red-400;
+  }
+  .diff-meta {
+    @apply text-white/40;
+  }
 }

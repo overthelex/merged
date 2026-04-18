@@ -13,12 +13,36 @@ const config: Config = {
         ink: {
           DEFAULT: '#0b0f17',
           soft: '#1a1f2b',
+          muted: '#2d3547',
         },
         accent: {
           DEFAULT: '#00d488',
           soft: '#b7f5dc',
+          dim: '#009f65',
         },
-        paper: '#f7f6f1',
+        paper: {
+          DEFAULT: '#f7f6f1',
+          dim: '#eeecea',
+        },
+        surface: {
+          DEFAULT: '#ffffff',
+          dim: '#f4f3ee',
+        },
+      },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '1rem', letterSpacing: '0.1em' }],
+      },
+      borderColor: {
+        DEFAULT: 'rgba(11,15,23,0.08)',
+      },
+      boxShadow: {
+        card: '0 1px 3px 0 rgba(11,15,23,0.06), 0 1px 2px -1px rgba(11,15,23,0.06)',
+        'card-md': '0 4px 12px 0 rgba(11,15,23,0.08), 0 1px 4px -1px rgba(11,15,23,0.06)',
+        'card-lg': '0 8px 24px 0 rgba(11,15,23,0.10), 0 2px 8px -2px rgba(11,15,23,0.08)',
+        'inset-top': 'inset 0 1px 0 rgba(255,255,255,0.06)',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },
   },
