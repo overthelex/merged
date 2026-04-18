@@ -47,92 +47,54 @@ jobs:
           docker push $PORTAL_IMAGE:${{ github.sha }}
           docker push $PORTAL_IMAGE:latest
 
-  migrate:
+  deploy:
     needs: build
     runs-on: [self-hosted, merged]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run migrations on EC2
-        run: |
-          scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
-            -r packages/db $EC2_USER@$EC2_HOST:/home/ubuntu/merged/db-migrations-staging
-          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-          set -euo pipefail
-          cd /home/ubuntu/merged
-
-          # Use the repo's migrations folder (pregenerated in git) if present;
-          # otherwise rely on drizzle's generate+migrate inside the staging dir
-          if [ -d db-migrations-staging/migrations ]; then
-            sudo docker run --rm \
-              --network merged_default \
-              -v "$PWD/db-migrations-staging":/work \
-              -w /work \
-              -e DATABASE_URL=postgres://merged:"$(cat secrets/postgres_password)"@merged-postgres:5432/merged \
-              node:20-alpine sh -c '
-                corepack enable >/dev/null 2>&1 || true
-                npm i --silent drizzle-orm@0.36.4 postgres@3.4.5 >/dev/null
-                node -e "
-                  const postgres = require(\"postgres\");
-                  const { drizzle } = require(\"drizzle-orm/postgres-js\");
-                  const { migrate } = require(\"drizzle-orm/postgres-js/migrator\");
-                  (async () => {
-                    const client = postgres(process.env.DATABASE_URL, { max: 1 });
-                    const db = drizzle(client);
-                    await migrate(db, { migrationsFolder: \"./migrations\" });
-                    await client.end();
-                    console.log(\"migrations applied\");
-                  })();
-                "
-              '
-          else
-            echo "no migrations/ dir in packages/db — skipping"
-          fi
-          rm -rf db-migrations-staging
-          EOF
-
-  deploy:
-    needs: migrate
-    runs-on: [self-hosted, merged]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Sync config to EC2
+      - name: Sync config + migrations to EC2
         run: |
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            'mkdir -p /home/ubuntu/merged /home/ubuntu/merged/secrets'
+            'mkdir -p /home/ubuntu/merged /home/ubuntu/merged/secrets /home/ubuntu/merged/migrations'
           scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
             docker-compose.prod.yml $EC2_USER@$EC2_HOST:/home/ubuntu/merged/docker-compose.prod.yml
           scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
             infra/Caddyfile $EC2_USER@$EC2_HOST:/home/ubuntu/merged/Caddyfile
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+            'rm -rf /home/ubuntu/merged/migrations/* /home/ubuntu/merged/migrations/.* 2>/dev/null; true'
+          scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
+            -r packages/db/migrations/. $EC2_USER@$EC2_HOST:/home/ubuntu/merged/migrations/
 
       - name: Ensure secrets + env on EC2
         run: |
-          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << EOF
           set -euo pipefail
           cd /home/ubuntu/merged
 
-          # Generate postgres password once, persist
           if [ ! -f secrets/postgres_password ]; then
             head -c 24 /dev/urandom | base64 | tr -d '=+/' > secrets/postgres_password
             chmod 600 secrets/postgres_password
           fi
 
-          # Portal env — rewrite every deploy (contains DATABASE_URL)
-          PG_PW=$(cat secrets/postgres_password)
+          PG_PW=\$(cat secrets/postgres_password)
           cat > .env.portal <<ENV
           NODE_ENV=production
-          DATABASE_URL=postgres://merged:${PG_PW}@merged-postgres:5432/merged
+          DATABASE_URL=postgres://merged:\${PG_PW}@merged-postgres:5432/merged
           PUBLIC_BASE_URL=https://merged.legal.org.ua
           APP_VERSION=${{ github.sha }}
+          AUTH_URL=https://app.merged.legal.org.ua
+          AUTH_TRUST_HOST=true
+          AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+          AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }}
+          AUTH_GOOGLE_SECRET=${{ secrets.AUTH_GOOGLE_SECRET }}
           ENV
           chmod 600 .env.portal
           EOF
 
-      - name: Deploy on EC2
+      - name: Start postgres + pull images
         run: |
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
           set -euo pipefail
@@ -146,6 +108,56 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           sudo docker pull ghcr.io/overthelex/merged-landing:latest
           sudo docker pull ghcr.io/overthelex/merged-portal:latest
+
+          # Bring up postgres first so migrations can run against it
+          sudo docker compose -f docker-compose.prod.yml up -d postgres
+
+          # Wait for healthy (max 60s)
+          for i in $(seq 1 30); do
+            if sudo docker exec merged-postgres pg_isready -U merged -d merged >/dev/null 2>&1; then
+              echo "postgres ready"
+              break
+            fi
+            sleep 2
+          done
+          EOF
+
+      - name: Run drizzle migrations
+        run: |
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          set -euo pipefail
+          cd /home/ubuntu/merged
+
+          PG_PW=$(cat secrets/postgres_password)
+          # Use the merged_default network so the ephemeral node container can reach merged-postgres by name
+          sudo docker run --rm \
+            --network merged_default \
+            -v "$PWD/migrations":/migrations:ro \
+            -e DATABASE_URL="postgres://merged:${PG_PW}@merged-postgres:5432/merged" \
+            node:20-alpine sh -c '
+              cd /tmp && mkdir app && cd app
+              npm init -y >/dev/null
+              npm i --silent drizzle-orm@0.36.4 postgres@3.4.5 >/dev/null
+              node -e "
+                const postgres = require(\"postgres\");
+                const { drizzle } = require(\"drizzle-orm/postgres-js\");
+                const { migrate } = require(\"drizzle-orm/postgres-js/migrator\");
+                (async () => {
+                  const client = postgres(process.env.DATABASE_URL, { max: 1 });
+                  const db = drizzle(client);
+                  await migrate(db, { migrationsFolder: \"/migrations\" });
+                  await client.end();
+                  console.log(\"migrations applied\");
+                })().catch(e => { console.error(e); process.exit(1); });
+              "
+            '
+          EOF
+
+      - name: Bring up full stack
+        run: |
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          set -euo pipefail
+          cd /home/ubuntu/merged
           sudo docker compose -f docker-compose.prod.yml up -d
           sudo docker image prune -f
           EOF
