@@ -10,7 +10,9 @@ permissions:
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true
+    if: >
+      github.event.pull_request.merged == true &&
+      !startsWith(github.event.pull_request.title, 'chore: bump version')
     runs-on: [self-hosted, merged]
 
     steps:
@@ -54,13 +56,21 @@ jobs:
         run: |
           jq '.version = "${{ steps.new.outputs.version }}"' package.json > tmp.json && mv tmp.json package.json
 
-      - name: Commit version bump
+      - name: Open version-bump PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          BRANCH="chore/bump-v${{ steps.new.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
           git add package.json
           git commit -m "chore: bump version to v${{ steps.new.outputs.version }}"
-          git push
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore: bump version to v${{ steps.new.outputs.version }}" \
+            --body "Automated version bump after #${{ github.event.pull_request.number }} (${{ steps.bump.outputs.type }}): ${{ steps.current.outputs.version }} → ${{ steps.new.outputs.version }}"
+          gh pr merge "$BRANCH" --squash --delete-branch
 
       - name: Create GitHub Release
         env:
