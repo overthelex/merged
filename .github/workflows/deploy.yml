@@ -76,6 +76,9 @@ jobs:
 
       - name: Health check
         run: |
-          sleep 15
+          sleep 10
+          # Test landing container directly (bypass Caddy's 308 http→https redirect)
           ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            'curl -sf http://localhost:80/ -H "Host: merged.legal.org.ua" | grep -qi "merged" && echo "landing healthy" || (echo "FAILED" && sudo docker logs --tail=50 merged-caddy merged-landing && exit 1)'
+            'sudo docker exec merged-landing wget -qO- http://localhost:8080/ | grep -qi "merged" && echo "landing healthy" || (echo "FAILED" && sudo docker logs --tail=50 merged-caddy merged-landing && exit 1)'
+          # Test public endpoint via Cloudflare
+          curl -sSf https://merged.legal.org.ua/ | grep -qi "технічний скринінг" && echo "public endpoint healthy"
