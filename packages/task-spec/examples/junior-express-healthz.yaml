@@ -1,0 +1,71 @@
+version: 1
+id: express-healthz
+title: Додай /healthz endpoint до Express-сервера
+level: junior
+language: typescript
+stack: [node, express]
+time_limit_min: 45
+
+description_md: |
+  У репозиторії є мінімальний Express-сервер з одним роутом `/`.
+
+  **Завдання.** Додай endpoint `GET /healthz`, що повертає `{ "status": "ok" }`
+  з HTTP 200. Додай один тест, який це перевіряє.
+
+  **Що ми оцінюємо:**
+  - PR проходить існуючі тести + новий тест.
+  - Дифф тримається малим (ідеально — 2–3 файли).
+  - PR-опис пояснює, чому саме так, а не інакше (наприклад, чому не кладеш logic
+    всередину `/`).
+
+  **AI дозволений.** Але Cursor не напише за тебе опис PR-у з reasoning — це
+  те, що ми міряємо.
+
+seeds:
+  - alpha
+  - bravo
+  - charlie
+  - delta
+  - echo
+
+rubric:
+  - key: tests_pass
+    label: Тести пройшли
+    source: auto
+    weight: 25
+    description: CI-пайплайн зелений, усі тести (існуючі + новий) проходять.
+
+  - key: diff_focus
+    label: Фокус диффу
+    source: auto
+    weight: 15
+    description: Змінено лише те, що необхідно; немає косметичних правок поза задачею.
+
+  - key: commit_quality
+    label: Якість комітів
+    source: auto
+    weight: 10
+    description: Атомарні коміти, ясні message-и, Conventional Commits — плюс.
+
+  - key: rationale
+    label: Rationale в PR-описі
+    source: llm
+    weight: 25
+    description: Кандидат пояснює «чому», а не тільки «що» — які альтернативи розглянуті.
+
+  - key: code_quality
+    label: Якість коду
+    source: llm
+    weight: 15
+    description: Читабельність, naming, відсутність мертвого коду, відповідність конвенціям репо.
+
+  - key: test_design
+    label: Якість тесту
+    source: llm
+    weight: 10
+    description: Тест перевіряє саме контракт endpoint-у, а не імплементацію.
+
+ci_extra:
+  - pnpm install --frozen-lockfile
+  - pnpm lint
+  - pnpm test -- --reporter=verbose
