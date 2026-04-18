@@ -13,3 +13,6 @@ coverage
 .DS_Store
 .turbo
 .vercel
+.claude/
+*.tsbuildinfo
+next-env.d.ts
