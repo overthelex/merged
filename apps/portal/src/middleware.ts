@@ -28,5 +28,5 @@ export default auth((req) => {
 
 export const config = {
   // Exclude: Auth.js routes, public API (health, leads), static assets, favicon.
-  matcher: ['/((?!api/auth|api/health|api/leads|_next/static|_next/image|favicon\\.ico).*)'],
+  matcher: ['/((?!api/auth|api/health|api/leads|api/github|invite|_next/static|_next/image|favicon\\.ico).*)'],
 };

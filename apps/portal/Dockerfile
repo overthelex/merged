@@ -5,6 +5,7 @@ WORKDIR /repo
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/portal/package.json apps/portal/package.json
 COPY packages/db/package.json packages/db/package.json
+COPY packages/github-app/package.json packages/github-app/package.json
 RUN pnpm install --frozen-lockfile --filter @merged/portal...
 
 FROM node:20-alpine AS build
@@ -13,9 +14,11 @@ WORKDIR /repo
 COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/apps/portal/node_modules ./apps/portal/node_modules
 COPY --from=deps /repo/packages/db/node_modules ./packages/db/node_modules
+COPY --from=deps /repo/packages/github-app/node_modules ./packages/github-app/node_modules
 COPY pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/portal ./apps/portal
 COPY packages/db ./packages/db
+COPY packages/github-app ./packages/github-app
 # Build-time placeholders — these let Next collect page data without connecting
 # to real services. Runtime env (from .env.portal) overrides them in production.
 ENV DATABASE_URL=postgres://build:build@localhost:5432/build \

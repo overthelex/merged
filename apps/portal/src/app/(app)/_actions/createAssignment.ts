@@ -10,8 +10,19 @@ import {
   users,
   type Seniority,
 } from '@merged/db';
+import {
+  parseGitHubUrl,
+  forkRepo,
+  protectMain,
+  seedAssessmentBranch,
+} from '@merged/github-app';
 import { requireUser } from '@/lib/session';
 import { shortId, inviteToken } from '@/lib/shortId';
+import { getGitHubClient, getForkOrg } from '@/lib/github';
+import {
+  renderAssignmentMarkdown,
+  renderRunnerScript,
+} from '@/lib/assignmentTemplate';
 
 const GITHUB_URL = /^https:\/\/github\.com\/([^/\s]+)\/([^/\s.]+)(?:\.git)?\/?$/i;
 
@@ -77,12 +88,13 @@ export async function createAssignment(
   }
 
   const sid = shortId(10);
-  const forkOwner = 'overthelex';
   const forkName = `merged_developers-${sid}`;
-  const forkUrl = `https://github.com/${forkOwner}/${forkName}`;
+  const forkOrg = getForkOrg();
   const token = inviteToken();
+  const portalUrl = process.env.PUBLIC_BASE_URL?.split(',')[0]?.trim() ?? 'https://merged.com.ua';
 
-  const inserted = await db
+  // Persist a pending_fork row first — we can retry the GitHub side later if it fails.
+  const insertedAssignment = await db
     .insert(assignments)
     .values({
       shortId: sid,
@@ -90,18 +102,62 @@ export async function createAssignment(
       hrUserId: user.id,
       sourceRepoUrl: parsed.data.repoUrl,
       sourceRepoPrivate: parsed.data.isPrivate ? 1 : 0,
-      forkOwner,
+      forkOwner: forkOrg,
       forkName,
-      forkUrl,
+      forkUrl: null,
       seniority: parsed.data.seniority as Seniority,
-      status: 'pending_candidate',
+      status: 'pending_fork',
       inviteToken: token,
       expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
     })
     .returning({ id: assignments.id });
-  const row = inserted[0];
+  const row = insertedAssignment[0];
   if (!row) throw new Error('Failed to create assignment');
 
-  // TODO(Phase B): actual GitHub fork creation via GitHub App.
+  // Best-effort GitHub side. If the App isn't configured (local dev), we leave
+  // the placeholder URL and status stays at pending_fork so the gap is visible.
+  const gh = getGitHubClient();
+  if (gh) {
+    try {
+      const source = await parseGitHubUrl(parsed.data.repoUrl);
+      const fork = await forkRepo(gh, source, forkName);
+      await protectMain(gh, forkName, fork.defaultBranch);
+      await seedAssessmentBranch(gh, {
+        forkName,
+        defaultBranch: fork.defaultBranch,
+        assignmentMarkdown: renderAssignmentMarkdown({
+          seniority: parsed.data.seniority as Seniority,
+          shortId: sid,
+          portalUrl,
+        }),
+        runnerShellScript: renderRunnerScript(),
+      });
+
+      await db
+        .update(assignments)
+        .set({
+          forkUrl: fork.url,
+          status: 'pending_candidate',
+        })
+        .where(eq(assignments.id, row.id));
+    } catch (err) {
+      console.error('fork flow failed', { assignmentId: row.id, err });
+      return {
+        ok: false,
+        message:
+          'Не вдалося створити форк. Перевірте URL і доступ, або спробуйте ще раз. Задачу збережено зі статусом pending_fork.',
+      };
+    }
+  } else {
+    // No GitHub App creds → local dev. Keep a reserved placeholder URL.
+    await db
+      .update(assignments)
+      .set({
+        forkUrl: `https://github.com/${forkOrg}/${forkName}`,
+        status: 'pending_candidate',
+      })
+      .where(eq(assignments.id, row.id));
+  }
+
   redirect(`/assignments/${row.id}`);
 }
