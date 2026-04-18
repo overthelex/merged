@@ -16,6 +16,14 @@ COPY --from=deps /repo/packages/db/node_modules ./packages/db/node_modules
 COPY pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/portal ./apps/portal
 COPY packages/db ./packages/db
+# Build-time placeholders — these let Next collect page data without connecting
+# to real services. Runtime env (from .env.portal) overrides them in production.
+ENV DATABASE_URL=postgres://build:build@localhost:5432/build \
+    AUTH_SECRET=build-placeholder-auth-secret-not-used-at-runtime \
+    AUTH_URL=https://app.merged.legal.org.ua \
+    AUTH_TRUST_HOST=true \
+    AUTH_GOOGLE_ID=build-placeholder \
+    AUTH_GOOGLE_SECRET=build-placeholder
 RUN pnpm --filter @merged/portal build
 
 FROM node:20-alpine AS runtime
