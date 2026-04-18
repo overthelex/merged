@@ -60,16 +60,30 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="chore/bump-v${{ steps.new.outputs.version }}"
+          VERSION="${{ steps.new.outputs.version }}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          # Include short SHA in branch name so retries never collide with
+          # stale remote branches from earlier failed runs.
+          BRANCH="chore/bump-v${VERSION}-${SHORT_SHA}"
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Close any stale bump PRs for the same version (e.g. previous failed runs).
+          gh pr list \
+            --search "chore: bump version to v${VERSION} in:title is:open" \
+            --json number \
+            --jq '.[].number' \
+            | xargs -r -n1 -I{} gh pr close {} --delete-branch || true
+
           git checkout -b "$BRANCH"
           git add package.json
-          git commit -m "chore: bump version to v${{ steps.new.outputs.version }}"
+          git commit -m "chore: bump version to v${VERSION}"
           git push -u origin "$BRANCH"
+
           gh pr create --base main --head "$BRANCH" \
-            --title "chore: bump version to v${{ steps.new.outputs.version }}" \
-            --body "Automated version bump after #${{ github.event.pull_request.number }} (${{ steps.bump.outputs.type }}): ${{ steps.current.outputs.version }} → ${{ steps.new.outputs.version }}"
+            --title "chore: bump version to v${VERSION}" \
+            --body "Automated version bump after #${{ github.event.pull_request.number }} (${{ steps.bump.outputs.type }}): ${{ steps.current.outputs.version }} → ${VERSION}"
           gh pr merge "$BRANCH" --squash --delete-branch
 
       - name: Create GitHub Release
