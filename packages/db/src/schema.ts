@@ -57,6 +57,12 @@ export const users = pgTable('user', {
   image: text('image'),
   role: userRole('role').notNull().default('hr_manager'),
   companyId: uuid('company_id').references((): any => companies.id, { onDelete: 'set null' }),
+  // Contact email can differ from the login email (e.g. signed in with
+  // personal Gmail but wants recruiting mail at a work address). Phone is
+  // optional — collected during onboarding alongside company name.
+  contactEmail: varchar('contact_email', { length: 320 }),
+  phone: varchar('phone', { length: 32 }),
+  onboardedAt: timestamp('onboarded_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

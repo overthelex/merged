@@ -10,6 +10,9 @@ export type SessionUser = {
   image: string | null;
   role: 'admin' | 'hr_manager';
   companyId: string | null;
+  contactEmail: string | null;
+  phone: string | null;
+  onboardedAt: Date | null;
 };
 
 export async function requireUser(): Promise<SessionUser> {
@@ -28,5 +31,8 @@ export async function requireUser(): Promise<SessionUser> {
     image: row.image,
     role: row.role,
     companyId: row.companyId,
+    contactEmail: row.contactEmail,
+    phone: row.phone,
+    onboardedAt: row.onboardedAt,
   };
 }

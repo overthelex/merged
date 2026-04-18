@@ -37,7 +37,12 @@ export default async function SettingsPage() {
 
       <div className="grid gap-5">
         <Card title="Профіль">
-          <ProfileForm defaultName={user.name ?? ''} email={user.email} />
+          <ProfileForm
+            defaultName={user.name ?? ''}
+            email={user.email}
+            defaultContactEmail={user.contactEmail ?? user.email}
+            defaultPhone={user.phone ?? ''}
+          />
           <div className="mt-5 pt-5 border-t border-ink/5 flex items-center justify-between">
             <div>
               <div className="text-xs text-ink-muted">Роль</div>

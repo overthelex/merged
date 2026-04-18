@@ -101,14 +101,15 @@ export async function acceptInvite(
     .where(eq(assignments.id, assignment.id));
 
   const [hr] = await db
-    .select({ email: users.email })
+    .select({ email: users.email, contactEmail: users.contactEmail })
     .from(users)
     .where(eq(users.id, assignment.hrUserId))
     .limit(1);
 
-  if (hr?.email && candidateRow?.id) {
+  const hrRecipient = hr?.contactEmail ?? hr?.email ?? null;
+  if (hrRecipient && candidateRow?.id) {
     await sendCandidateAcceptedEmail({
-      to: hr.email,
+      to: hrRecipient,
       assignmentId: assignment.id,
       candidateId: candidateRow.id,
       githubUsername: parsed.data.githubUsername,
