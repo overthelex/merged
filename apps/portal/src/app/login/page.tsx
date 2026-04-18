@@ -92,11 +92,11 @@ export default async function LoginPage({
           }}
         >
           Продовжуючи, ви погоджуєтесь з{' '}
-          <a href="https://merged.legal.org.ua/terms" style={{ color: '#0b0f17', textDecoration: 'underline' }}>
+          <a href="https://merged.com.ua/terms" style={{ color: '#0b0f17', textDecoration: 'underline' }}>
             умовами використання
           </a>{' '}
           та{' '}
-          <a href="https://merged.legal.org.ua/privacy" style={{ color: '#0b0f17', textDecoration: 'underline' }}>
+          <a href="https://merged.com.ua/privacy" style={{ color: '#0b0f17', textDecoration: 'underline' }}>
             політикою приватності
           </a>
           .

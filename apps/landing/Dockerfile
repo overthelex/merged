@@ -14,7 +14,7 @@ COPY --from=deps /repo/apps/landing/node_modules ./apps/landing/node_modules
 COPY pnpm-workspace.yaml package.json ./
 COPY tsconfig.base.json ./
 COPY apps/landing ./apps/landing
-ARG NEXT_PUBLIC_PORTAL_BASE_URL=https://portal.legal.org.ua
+ARG NEXT_PUBLIC_PORTAL_BASE_URL=https://portal.merged.com.ua
 ENV NEXT_PUBLIC_PORTAL_BASE_URL=$NEXT_PUBLIC_PORTAL_BASE_URL
 RUN pnpm --filter @merged/landing build
 
