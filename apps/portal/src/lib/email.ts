@@ -128,6 +128,7 @@ export async function sendCandidateInviteEmail(input: {
       subject: rendered.subject,
       html: rendered.html,
       replyTo: input.hrEmail ?? undefined,
+      from: senderFromHrName(input.hrName, cfg?.from),
     });
     if (result.ok) {
       console.info('[email] sent', { label: 'candidate_invite', id: result.id });
@@ -246,4 +247,17 @@ export function seniorityLabel(v: string): string {
 
 export function stripGithubPrefix(url: string): string {
   return url.replace(/^https?:\/\/(www\.)?github\.com\//i, '').replace(/\.git\/?$/, '');
+}
+
+// Build an RFC5322 From header that uses the recruiter's name as display
+// while keeping the verified mailbox (e.g. no-reply@merged.com.ua) as the
+// actual address. Falls back to the configured From if no name available.
+function senderFromHrName(hrName: string | null, defaultFrom?: string): string | undefined {
+  const fallback = defaultFrom ?? 'merged <no-reply@merged.com.ua>';
+  const name = hrName?.trim();
+  if (!name) return fallback;
+  const addrMatch = fallback.match(/<([^>]+)>/);
+  const addr = (addrMatch?.[1] ?? fallback).trim();
+  const safe = name.replace(/["<>\r\n]/g, '').slice(0, 80);
+  return `"${safe}" <${addr}>`;
 }

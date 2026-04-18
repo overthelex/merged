@@ -23,6 +23,7 @@ export type SendInput = {
   subject: string;
   html: string;
   replyTo?: string;
+  from?: string;
 };
 
 export type SendResult =
@@ -48,7 +49,7 @@ export async function sendEmail(cfg: EmailConfig | null, input: SendInput): Prom
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: cfg.from,
+      from: input.from ?? cfg.from,
       to: cleanRecipients,
       subject: input.subject,
       html: input.html,
