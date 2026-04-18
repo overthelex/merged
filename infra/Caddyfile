@@ -14,20 +14,23 @@
   }
 }
 
+# Apex — landing + portal share the hostname. Path-based routing sends
+# auth/app/internal-API requests to portal; everything else to landing.
 merged.legal.org.ua {
   encode zstd gzip
   import securityHeaders
+
+  @portal path /login /login/* /app /app/* /api/auth /api/auth/* /api/health /api/leads /api/leads/*
+  reverse_proxy @portal portal:3000
+
   reverse_proxy landing:8080
+
   log {
     output file /var/log/caddy/merged.log
   }
 }
 
+# Legacy host — 301 to the apex so any old bookmarks keep working.
 portal.legal.org.ua {
-  encode zstd gzip
-  import securityHeaders
-  reverse_proxy portal:3000
-  log {
-    output file /var/log/caddy/merged-portal.log
-  }
+  redir https://merged.legal.org.ua{uri} 301
 }

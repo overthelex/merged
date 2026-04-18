@@ -20,7 +20,7 @@ export default auth((req) => {
 
   if (isAuthed && pathname === '/login') {
     const url = req.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/app';
     url.search = '';
     return Response.redirect(url);
   }

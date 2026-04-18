@@ -14,10 +14,10 @@ export default async function LoginPage({
   const session = await auth();
   const { from } = await searchParams;
   if (session?.user) {
-    redirect(from && from.startsWith('/') ? from : '/');
+    redirect(from && from.startsWith('/') ? from : '/app');
   }
 
-  const redirectTo = from && from.startsWith('/') ? from : '/';
+  const redirectTo = from && from.startsWith('/') ? from : '/app';
 
   return (
     <main

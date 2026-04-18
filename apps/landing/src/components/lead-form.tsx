@@ -2,7 +2,8 @@
 
 import { useState, useId } from 'react';
 
-const PORTAL = process.env.NEXT_PUBLIC_PORTAL_BASE_URL ?? 'https://portal.legal.org.ua';
+// Empty → same-origin fetch. Caddy routes /api/leads on the apex to portal.
+const PORTAL = process.env.NEXT_PUBLIC_PORTAL_BASE_URL ?? '';
 
 type Status = 'idle' | 'sending' | 'ok' | 'err';
 
