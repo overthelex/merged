@@ -1,9 +1,14 @@
-# Landing — static export
+{
+  email hello@merged.legal.org.ua
+  # Respect Cloudflare-proxied traffic
+  servers {
+    trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22
+  }
+}
+
 merged.legal.org.ua {
-  root * /srv/merged/landing
-  file_server
   encode zstd gzip
-  try_files {path} {path}/ {path}.html =404
+  reverse_proxy landing:8080
 
   header {
     Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -12,28 +17,15 @@ merged.legal.org.ua {
     Permissions-Policy "geolocation=(), microphone=(), camera=()"
   }
 
-  # Cache static assets hard
-  @assets path /_next/static/* /favicon.ico /*.png /*.svg /*.jpg /*.webp
-  header @assets Cache-Control "public, max-age=31536000, immutable"
-
   log {
     output file /var/log/caddy/merged.log
-    format console
   }
 }
 
-# Portal — Next.js on :3000, reverse-proxied (v1)
-app.merged.legal.org.ua {
-  encode zstd gzip
-  reverse_proxy localhost:3000
-
-  header {
-    Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    X-Content-Type-Options nosniff
-  }
-
-  log {
-    output file /var/log/caddy/merged-portal.log
-    format console
-  }
-}
+# app.merged.legal.org.ua {
+#   encode zstd gzip
+#   reverse_proxy portal:3000
+#   log {
+#     output file /var/log/caddy/merged-portal.log
+#   }
+# }

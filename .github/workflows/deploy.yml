@@ -1,0 +1,81 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  LANDING_IMAGE: ghcr.io/overthelex/merged-landing
+  EC2_HOST: 18.196.127.148
+  EC2_USER: ubuntu
+  SSH_KEY: ~/.ssh/merged-key.pem
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, 'chore: bump version')"
+    runs-on: [self-hosted, merged]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push landing image
+        run: |
+          docker build \
+            -t $LANDING_IMAGE:${{ github.sha }} \
+            -t $LANDING_IMAGE:latest \
+            -f apps/landing/Dockerfile .
+          docker push $LANDING_IMAGE:${{ github.sha }}
+          docker push $LANDING_IMAGE:latest
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, merged]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Sync config to EC2
+        run: |
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+            'mkdir -p /home/ubuntu/merged'
+          scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
+            docker-compose.prod.yml $EC2_USER@$EC2_HOST:/home/ubuntu/merged/docker-compose.prod.yml
+          scp -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no \
+            infra/Caddyfile $EC2_USER@$EC2_HOST:/home/ubuntu/merged/Caddyfile
+
+      - name: Deploy on EC2
+        run: |
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          set -euo pipefail
+          cd /home/ubuntu/merged
+
+          # First deploy: stop the bootstrap host Caddy so container can bind 80/443
+          if systemctl is-active --quiet caddy; then
+            sudo systemctl stop caddy
+            sudo systemctl disable caddy
+          fi
+
+          # Login to GHCR on the EC2 to pull private image
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          sudo docker pull ghcr.io/overthelex/merged-landing:latest
+          sudo docker compose -f docker-compose.prod.yml up -d
+          sudo docker image prune -f
+          EOF
+
+      - name: Health check
+        run: |
+          sleep 15
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+            'curl -sf http://localhost:80/ -H "Host: merged.legal.org.ua" | grep -qi "merged" && echo "landing healthy" || (echo "FAILED" && sudo docker logs --tail=50 merged-caddy merged-landing && exit 1)'
