@@ -6,9 +6,11 @@ build
 out
 coverage
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
+secrets/
+*.pem
+*.key
 *.log
 .DS_Store
 .turbo
