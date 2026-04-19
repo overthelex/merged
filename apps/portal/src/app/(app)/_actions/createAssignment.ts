@@ -24,6 +24,7 @@ import {
   renderAssignmentMarkdown,
   renderRunnerScript,
 } from '@/lib/assignmentTemplate';
+import { composeAssignmentFromRepo } from '@/lib/compose';
 import {
   sendAssignmentCreatedEmail,
   seniorityLabel,
@@ -128,14 +129,36 @@ export async function createAssignment(
       const source = await parseGitHubUrl(parsed.data.repoUrl);
       const fork = await forkRepo(gh, source, forkName);
       await protectMain(gh, forkName, fork.defaultBranch);
-      await seedAssessmentBranch(gh, {
-        forkName,
-        defaultBranch: fork.defaultBranch,
-        assignmentMarkdown: renderAssignmentMarkdown({
+
+      // Run Scout → Composer → Calibrator against the source repo (identical
+      // content to the fresh fork). A Bedrock/pipeline failure must not block
+      // the HR flow — fall back to the hardcoded template.
+      const composed = await safeCompose({
+        repoUrl: parsed.data.repoUrl,
+        accessToken: parsed.data.accessKey || undefined,
+        seniority: parsed.data.seniority as Seniority,
+        assignmentId: row.id,
+      });
+      const assignmentMarkdown =
+        composed?.assignmentMd ??
+        renderAssignmentMarkdown({
           seniority: parsed.data.seniority as Seniority,
           shortId: sid,
           portalUrl,
-        }),
+        });
+      if (composed) {
+        console.info('compose.ok', {
+          assignmentId: row.id,
+          taskId: composed.pipeline.spec.id,
+          revisions: composed.pipeline.verdicts.length,
+          surfaces: composed.pipeline.surfaces.length,
+        });
+      }
+
+      await seedAssessmentBranch(gh, {
+        forkName,
+        defaultBranch: fork.defaultBranch,
+        assignmentMarkdown,
         runnerShellScript: renderRunnerScript(),
       });
 
@@ -185,4 +208,25 @@ export async function createAssignment(
   });
 
   redirect(`/assignments/${row.id}`);
+}
+
+async function safeCompose(opts: {
+  repoUrl: string;
+  accessToken?: string;
+  seniority: Seniority;
+  assignmentId: string;
+}) {
+  try {
+    return await composeAssignmentFromRepo({
+      repoUrl: opts.repoUrl,
+      accessToken: opts.accessToken,
+      seniority: opts.seniority,
+    });
+  } catch (err) {
+    console.error('compose failed — falling back to template', {
+      assignmentId: opts.assignmentId,
+      err: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
 }

@@ -288,8 +288,23 @@ function SubmitButton() {
 const FORK_STEPS: ProgressStep[] = [
   {
     label: 'Форкуємо репозиторій',
-    hint: 'GitHub клонує джерело в нашу організацію — це найдовший етап.',
+    hint: 'GitHub клонує джерело в нашу організацію.',
     durationMs: 6000,
+  },
+  {
+    label: 'Аналіз репозиторію',
+    hint: 'Scout-агенти паралельно читають код, шукають поверхні для задачі.',
+    durationMs: 20000,
+  },
+  {
+    label: 'Створення задачі',
+    hint: 'Composer готує task.yaml і ASSIGNMENT.md під обраний рівень.',
+    durationMs: 25000,
+  },
+  {
+    label: 'Перевірка задачі',
+    hint: 'Calibrator валідує схему, рубрику, anti-cheat та сценарій.',
+    durationMs: 15000,
   },
   {
     label: 'Налаштовуємо захист main-гілки',
@@ -298,7 +313,7 @@ const FORK_STEPS: ProgressStep[] = [
   },
   {
     label: 'Готуємо assessment-гілку',
-    hint: 'Додаємо ASSIGNMENT.md і runner-скрипт.',
+    hint: 'Комітимо ASSIGNMENT.md і runner-скрипт у форк.',
     durationMs: 3000,
   },
   {
@@ -318,7 +333,7 @@ function ForkPendingOverlay() {
       show={pending}
       title="Створюємо задачу…"
       steps={FORK_STEPS}
-      footer="Зазвичай це займає 10–20 секунд. Не закривайте вкладку."
+      footer="Аналіз репо й калібрування можуть тривати до 2 хв. Не закривайте вкладку."
     />
   );
 }
