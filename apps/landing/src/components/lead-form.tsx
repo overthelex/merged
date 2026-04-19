@@ -22,7 +22,17 @@ export function LeadForm() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ ...data, source: 'landing' }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as
+          | { error?: string; issues?: Array<{ message: string; path: (string | number)[] }> }
+          | null;
+        if (res.status === 422 && body?.issues?.[0]) {
+          const first = body.issues[0];
+          const field = first.path?.[0] ? ` (${String(first.path[0])})` : '';
+          throw new Error(`${first.message}${field}`);
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
       setStatus('ok');
       form.reset();
     } catch (err) {
@@ -67,10 +77,10 @@ export function LeadForm() {
               <p className="text-sm text-paper/60 leading-relaxed">
                 Не хочете форму? Напишіть одразу:{' '}
                 <a
-                  href="mailto:hello@merged.legal.org.ua"
+                  href="mailto:request@merged.com.ua"
                   className="text-accent underline underline-offset-2 hover:text-accent/80 transition-colors"
                 >
-                  hello@merged.legal.org.ua
+                  request@merged.com.ua
                 </a>
               </p>
             </div>
@@ -81,7 +91,7 @@ export function LeadForm() {
             {status === 'ok' ? (
               <SuccessState />
             ) : (
-              <form onSubmit={onSubmit} className="p-8 sm:p-10 space-y-6" noValidate>
+              <form onSubmit={onSubmit} className="p-8 sm:p-10 space-y-6">
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field
                     name="name"
@@ -140,9 +150,9 @@ export function LeadForm() {
                       Не вдалося надіслати{error ? `: ${error}` : ''}. Напишіть на{' '}
                       <a
                         className="underline underline-offset-2 hover:text-red-300 transition-colors"
-                        href="mailto:hello@merged.legal.org.ua"
+                        href="mailto:request@merged.com.ua"
                       >
-                        hello@merged.legal.org.ua
+                        request@merged.com.ua
                       </a>
                     </p>
                   )}
