@@ -13,7 +13,8 @@ jobs:
   release:
     if: >
       github.event.pull_request.merged == true &&
-      !startsWith(github.event.pull_request.title, 'chore: bump version')
+      !startsWith(github.event.pull_request.title, 'chore: bump version') &&
+      !startsWith(github.event.pull_request.title, 'chore: release packages')
     runs-on: [self-hosted, merged]
 
     steps:
