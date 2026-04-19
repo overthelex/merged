@@ -77,13 +77,13 @@ export default function BlogIndexPage() {
             >
               <div className="relative w-full h-64 sm:h-80 overflow-hidden">
                 <AttractorBanner seed={featured.slug} className="absolute inset-0" />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/35 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-paper/70 via-paper/20 to-transparent pointer-events-none" />
                 <div className="absolute inset-0 flex items-end p-6 sm:p-10 pointer-events-none">
                   <div>
                     <span className="inline-block label-mono px-2.5 py-1 rounded-md bg-accent/95 text-ink border border-accent mb-4">
                       {CATEGORY_LABEL[featured.category]}
                     </span>
-                    <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-paper leading-[1.1] tracking-tight max-w-3xl drop-shadow-lg">
+                    <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink leading-[1.1] tracking-tight max-w-3xl">
                       {featured.title}
                     </h2>
                   </div>
@@ -143,9 +143,9 @@ export default function BlogIndexPage() {
                 >
                   <div className="relative w-full h-48 sm:h-52 overflow-hidden">
                     <AttractorBanner seed={article.slug} className="absolute inset-0" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-paper/75 via-paper/25 to-transparent pointer-events-none" />
                     <div className="absolute inset-0 flex items-end p-5 pointer-events-none">
-                      <h2 className="font-display text-lg sm:text-xl font-semibold text-paper leading-[1.2] tracking-tight drop-shadow-lg">
+                      <h2 className="font-display text-lg sm:text-xl font-semibold text-ink leading-[1.2] tracking-tight">
                         {article.title}
                       </h2>
                     </div>

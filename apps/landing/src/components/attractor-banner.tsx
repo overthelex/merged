@@ -108,16 +108,16 @@ const ATTRACTORS = [
 ];
 
 const PALETTES = [
-  // ink + accent green (merged primary)
-  { bg: '#0b0f17', colors: ['#0b0f17', '#111a23', '#143240', '#115555', '#008a5e', '#00a76e', '#00d488', '#34e3a1', '#7af0c1', '#b7f5dc', '#d9faea', '#f7f6f1'] },
-  // ink + deep teal
-  { bg: '#0b0f17', colors: ['#06101c', '#0b1a2a', '#0e2d40', '#0f3f5e', '#146a7b', '#1e9ba5', '#2dd4bf', '#5eead4', '#99f6e4', '#ccfbf1', '#e0f7f4', '#f3fbf9'] },
-  // ink + amber (warm)
-  { bg: '#0b0f17', colors: ['#0b0f17', '#1a110a', '#3a1f07', '#6b3205', '#a86310', '#d97706', '#f59e0b', '#fbbf24', '#fcd34d', '#fde68a', '#fef3c7', '#fffbeb'] },
-  // ink + violet
-  { bg: '#0b0f17', colors: ['#0a0a1a', '#15142e', '#20174f', '#341a80', '#5b21b6', '#7c3aed', '#a78bfa', '#c084fc', '#d8b4fe', '#e9d5ff', '#f3e8ff', '#faf5ff'] },
-  // ink + coral
-  { bg: '#0b0f17', colors: ['#140606', '#260a0a', '#4a0e0e', '#7a1a1a', '#b83030', '#e74c3c', '#ff6b6b', '#ff9a76', '#ffbe88', '#ffd8b3', '#ffe9d3', '#fff3e3'] },
+  // paper + accent green (merged primary) — inverted for light background
+  { bg: '#f7f6f1', colors: ['#f7f6f1', '#d9faea', '#b7f5dc', '#7af0c1', '#34e3a1', '#00d488', '#00a76e', '#008a5e', '#115555', '#143240', '#111a23', '#0b0f17'] },
+  // paper + deep teal
+  { bg: '#f7f6f1', colors: ['#f3fbf9', '#e0f7f4', '#ccfbf1', '#99f6e4', '#5eead4', '#2dd4bf', '#1e9ba5', '#146a7b', '#0f3f5e', '#0e2d40', '#0b1a2a', '#06101c'] },
+  // paper + amber (warm)
+  { bg: '#f7f6f1', colors: ['#fffbeb', '#fef3c7', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#a86310', '#6b3205', '#3a1f07', '#1a110a', '#0b0f17'] },
+  // paper + violet
+  { bg: '#f7f6f1', colors: ['#faf5ff', '#f3e8ff', '#e9d5ff', '#d8b4fe', '#c084fc', '#a78bfa', '#7c3aed', '#5b21b6', '#341a80', '#20174f', '#15142e', '#0a0a1a'] },
+  // paper + coral
+  { bg: '#f7f6f1', colors: ['#fff3e3', '#ffe9d3', '#ffd8b3', '#ffbe88', '#ff9a76', '#ff6b6b', '#e74c3c', '#b83030', '#7a1a1a', '#4a0e0e', '#260a0a', '#140606'] },
 ];
 
 const PALETTE_RGBS = PALETTES.map((p) => p.colors.map(hexToRgb));
@@ -210,7 +210,7 @@ function generatePoints(seed: string) {
   }
   const pxWidth = pxMaxX - pxMinX || 1;
   const pxHeight = pxMaxY - pxMinY || 1;
-  const targetFill = 0.82;
+  const targetFill = 2.46;
   const fitScaleX = (1920 * targetFill) / pxWidth;
   const fitScaleY = (960 * targetFill) / pxHeight;
   const autoScale = Math.min(fitScaleX, fitScaleY) * testSc;
@@ -290,15 +290,15 @@ function drawFrame(
   }
 
   const vig = ctx.createRadialGradient(w / 2, h / 2, h * 0.25, w / 2, h / 2, w * 0.75);
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(0.7, 'rgba(0,0,0,0.12)');
-  vig.addColorStop(1, 'rgba(0,0,0,0.45)');
+  vig.addColorStop(0, 'rgba(247,246,241,0)');
+  vig.addColorStop(0.7, 'rgba(247,246,241,0.18)');
+  vig.addColorStop(1, 'rgba(247,246,241,0.55)');
   ctx.fillStyle = vig;
   ctx.fillRect(0, 0, w, h);
 
   const bf = ctx.createLinearGradient(0, h * 0.45, 0, h);
-  bf.addColorStop(0, 'rgba(0,0,0,0)');
-  bf.addColorStop(1, 'rgba(0,0,0,0.38)');
+  bf.addColorStop(0, 'rgba(247,246,241,0)');
+  bf.addColorStop(1, 'rgba(247,246,241,0.45)');
   ctx.fillStyle = bf;
   ctx.fillRect(0, 0, w, h);
 }

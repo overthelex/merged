@@ -105,9 +105,9 @@ export default async function ArticlePage({ params }: PageProps) {
       <div className="mx-auto w-full max-w-3xl px-6 mt-8">
         <div className="relative h-52 sm:h-72 w-full overflow-hidden rounded-2xl shadow-card-md">
           <AttractorBanner seed={article.slug} className="absolute inset-0" animate />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-paper/75 via-paper/25 to-transparent pointer-events-none" />
           <div className="absolute inset-0 flex items-end p-6 sm:p-8 pointer-events-none">
-            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-paper leading-[1.1] tracking-tight drop-shadow-lg">
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink leading-[1.1] tracking-tight">
               {article.title}
             </h1>
           </div>
