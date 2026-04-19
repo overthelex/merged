@@ -1,0 +1,78 @@
+name: Release Packages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-packages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Skip when the push is itself the Changesets "Version Packages" commit —
+    # otherwise we'd re-trigger on our own release merges.
+    if: "!startsWith(github.event.head_commit.message, 'chore: release packages')"
+    runs-on: [self-hosted, merged]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create release PR or tag packages
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          # Aggregates all pending .changeset/*.md files into one PR that
+          # bumps package versions + writes CHANGELOG.md per package.
+          version: pnpm version-packages
+          # When the release PR is merged, this is what runs:
+          # Changesets compares HEAD vs. each package's version in npm — but
+          # since all packages are private, it just creates git tags and we
+          # don't actually publish. We intercept with a no-op `publish` script
+          # and let a follow-up step create GitHub Releases per tag.
+          publish: pnpm exec changeset tag
+          commit: 'chore: release packages'
+          title: 'chore: release packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Releases for new tags
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISHED: ${{ steps.changesets.outputs.publishedPackages }}
+        run: |
+          echo "$PUBLISHED" | jq -c '.[]' | while IFS= read -r pkg; do
+            name=$(echo "$pkg" | jq -r .name)
+            version=$(echo "$pkg" | jq -r .version)
+            tag="${name}@${version}"
+            body="## ${name} v${version}\n\nSee [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/$(echo "$name" | sed 's|@merged/|packages/|')/CHANGELOG.md) for details."
+            echo "Creating release for $tag"
+            gh release create "$tag" \
+              --title "$tag" \
+              --notes "$(printf '%b' "$body")" \
+              --target main \
+              || echo "Release $tag may already exist — skipping"
+          done
