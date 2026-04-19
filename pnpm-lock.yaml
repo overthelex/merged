@@ -204,6 +204,28 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
+  packages/task-composer:
+    dependencies:
+      '@aws-sdk/client-bedrock-runtime':
+        specifier: ^3.693.0
+        version: 3.1032.0
+      '@merged/task-spec':
+        specifier: workspace:*
+        version: link:../task-spec
+      yaml:
+        specifier: ^2.6.1
+        version: 2.8.3
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.9.0
+        version: 22.19.17
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
   packages/task-spec:
     dependencies:
       yaml:
