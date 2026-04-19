@@ -72,7 +72,7 @@ export function HowItWorks() {
           {STEPS.map((s, i) => (
             <li
               key={s.n}
-              className="group bg-paper hover:bg-surface transition-colors duration-150 p-8 sm:p-10 flex flex-col gap-5"
+              className="group bg-paper hover:bg-surface transition-colors duration-150 p-5 sm:p-8 lg:p-10 flex flex-col gap-5"
             >
               {/* Top row: number + time badge */}
               <div className="flex items-start justify-between">

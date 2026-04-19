@@ -83,7 +83,7 @@ export default async function CandidateDetail({
                   href={`https://github.com/${candidate.githubUsername}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-ink hover:text-accent-dim transition"
+                  className="font-mono text-ink hover:text-accent-dim transition break-all"
                 >
                   @{candidate.githubUsername}
                 </a>
@@ -95,7 +95,7 @@ export default async function CandidateDetail({
               {candidate.email ? (
                 <a
                   href={`mailto:${candidate.email}`}
-                  className="text-ink hover:text-accent-dim transition"
+                  className="text-ink hover:text-accent-dim transition break-all"
                 >
                   {candidate.email}
                 </a>
@@ -122,12 +122,12 @@ export default async function CandidateDetail({
         </Card>
 
         <Card title="Задача">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="font-mono text-xs text-ink mb-2">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="font-mono text-xs text-ink mb-2 break-all">
                 {stripGithubPrefix(assignment.sourceRepoUrl)}
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="label-mono text-accent-dim">
                   {SENIORITY_LABEL[assignment.seniority] ?? assignment.seniority}
                 </span>
@@ -156,7 +156,8 @@ export default async function CandidateDetail({
               Кандидат ще не відкрив pull request.
             </p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="-mx-5 sm:mx-0 overflow-x-auto">
+            <table className="w-full text-sm min-w-[360px]">
               <thead className="text-ink-muted text-xs">
                 <tr>
                   <th className="text-left font-medium py-2">PR</th>
@@ -182,6 +183,7 @@ export default async function CandidateDetail({
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </Card>
       </div>

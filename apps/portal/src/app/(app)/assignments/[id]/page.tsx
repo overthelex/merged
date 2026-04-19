@@ -84,15 +84,15 @@ export default async function AssignmentDetail({
         ← Усі задачі
       </Link>
 
-      <div className="flex items-start justify-between gap-6 mb-8">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <div className="min-w-0">
           <div className="label-mono text-ink-muted mb-2">
             Задача · {row.shortId}
           </div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">
+          <h1 className="font-display text-xl sm:text-2xl font-semibold tracking-tight text-ink break-all">
             {stripGithubPrefix(row.sourceRepoUrl)}
           </h1>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             <span className="label-mono text-accent-dim">
               {SENIORITY_LABEL[row.seniority] ?? row.seniority}
             </span>
@@ -122,8 +122,8 @@ export default async function AssignmentDetail({
                 права outside collaborator та зможе надсилати PR проти{' '}
                 <span className="font-mono">main</span>.
               </p>
-              <div className="flex items-center gap-2 rounded-md border border-ink/10 bg-surface-dim px-3 py-2">
-                <code className="flex-1 truncate font-mono text-xs text-ink">
+              <div className="flex items-center gap-2 rounded-md border border-ink/10 bg-surface-dim px-3 py-2 overflow-hidden">
+                <code className="flex-1 min-w-0 truncate font-mono text-xs text-ink">
                   {row.forkUrl}
                 </code>
                 <CopyButton value={row.forkUrl} />
@@ -147,8 +147,8 @@ export default async function AssignmentDetail({
             <div className="label-mono text-ink-muted mb-2">
               Посилання {row.sourceRepoPrivate ? '(потрібен access key)' : ''}
             </div>
-            <div className="flex items-center gap-2 rounded-md border border-ink/10 bg-surface-dim px-3 py-2">
-              <code className="flex-1 truncate font-mono text-xs text-ink">
+            <div className="flex items-center gap-2 rounded-md border border-ink/10 bg-surface-dim px-3 py-2 overflow-hidden">
+              <code className="flex-1 min-w-0 truncate font-mono text-xs text-ink">
                 {inviteUrl}
               </code>
               <CopyButton value={inviteUrl} />
@@ -215,32 +215,34 @@ export default async function AssignmentDetail({
               Кандидат ще не відкрив pull request. Щойно PR зʼявиться — сабміт і оцінка відобразяться тут.
             </p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-1">
+            <table className="w-full text-sm min-w-[320px]">
               <thead className="text-ink-muted text-xs">
                 <tr>
-                  <th className="text-left font-medium py-2">PR</th>
-                  <th className="text-left font-medium py-2">SHA</th>
-                  <th className="text-left font-medium py-2">Оцінка</th>
-                  <th className="text-left font-medium py-2">Дата</th>
+                  <th className="text-left font-medium py-2 px-1">PR</th>
+                  <th className="text-left font-medium py-2 px-1">SHA</th>
+                  <th className="text-left font-medium py-2 px-1">Оцінка</th>
+                  <th className="text-left font-medium py-2 px-1">Дата</th>
                 </tr>
               </thead>
               <tbody>
                 {subs.map((s) => (
                   <tr key={s.id} className="border-t border-ink/5">
-                    <td className="py-2 font-mono">#{s.prNumber}</td>
-                    <td className="py-2 font-mono text-xs">
+                    <td className="py-2 px-1 font-mono">#{s.prNumber}</td>
+                    <td className="py-2 px-1 font-mono text-xs">
                       {s.prHeadSha.slice(0, 7)}
                     </td>
-                    <td className="py-2 tabular">
+                    <td className="py-2 px-1 tabular">
                       {s.score != null ? `${s.score} / 100` : '—'}
                     </td>
-                    <td className="py-2 text-ink-muted tabular">
+                    <td className="py-2 px-1 text-ink-muted tabular">
                       {s.createdAt.toISOString().slice(0, 10)}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </Card>
       </div>

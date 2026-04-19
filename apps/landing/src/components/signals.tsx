@@ -94,14 +94,14 @@ export function Signals() {
 
           {/* Right — rubric table */}
           <div className="rounded-2xl border border-ink/8 bg-surface shadow-card-md overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-ink/6">
+            <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-ink/6">
               <span className="label-mono text-ink/50">Ваги рубрики</span>
               <span className="tabular label-mono text-ink/40">усього 100%</span>
             </div>
 
             {/* Auto section */}
             <div>
-              <div className="px-6 py-3 bg-ink/3 border-b border-ink/5">
+              <div className="px-4 py-2.5 sm:px-6 sm:py-3 bg-ink/3 border-b border-ink/5">
                 <span className="label-mono text-ink/40">Автоматичний CI</span>
               </div>
               <ul className="divide-y divide-ink/5">
@@ -113,7 +113,7 @@ export function Signals() {
 
             {/* LLM section */}
             <div className="border-t border-ink/8">
-              <div className="px-6 py-3 bg-accent/5 border-b border-ink/5">
+              <div className="px-4 py-2.5 sm:px-6 sm:py-3 bg-accent/5 border-b border-ink/5">
                 <span className="label-mono text-accent/70">LLM-суддя</span>
               </div>
               <ul className="divide-y divide-ink/5">
@@ -123,7 +123,7 @@ export function Signals() {
               </ul>
             </div>
 
-            <div className="px-6 py-3.5 border-t border-ink/6 bg-ink/2">
+            <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-t border-ink/6 bg-ink/2">
               <p className="label-mono text-ink/35">
                 * Ваги налаштовуються на рівні template-а задачі
               </p>
@@ -141,11 +141,11 @@ function SignalRow({
   signal: (typeof SIGNALS)[number];
 }) {
   return (
-    <li className="px-6 py-4">
+    <li className="px-4 py-3.5 sm:px-6 sm:py-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="text-sm text-ink/80 font-medium truncate">{signal.label}</div>
-          <div className="mt-0.5 text-xs text-ink/45 truncate">{signal.note}</div>
+          <div className="text-sm text-ink/80 font-medium">{signal.label}</div>
+          <div className="mt-0.5 text-xs text-ink/45 line-clamp-2">{signal.note}</div>
         </div>
         <span className="tabular font-mono text-sm text-ink/50 shrink-0 w-10 text-right">
           {signal.weight}%

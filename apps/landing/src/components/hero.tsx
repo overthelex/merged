@@ -31,7 +31,7 @@ export function Hero() {
               <span className="label-mono text-ink/60">merged · закрита бета · 2026</span>
             </div>
 
-            <h1 className="mt-8 font-display text-[3.25rem] sm:text-[4.5rem] font-semibold leading-[0.93] tracking-[-0.02em] text-ink">
+            <h1 className="mt-8 font-display text-[2.25rem] sm:text-[3.25rem] lg:text-[4.5rem] font-semibold leading-[0.93] tracking-[-0.02em] text-ink">
               Технічний скринінг —{' '}
               <span className="relative inline-block">
                 <span className="relative z-10">без співбесід</span>

@@ -23,7 +23,7 @@ export default async function OnboardingPage() {
     : null;
 
   return (
-    <main className="min-h-screen bg-paper flex flex-col items-center px-6 py-10">
+    <main className="min-h-screen bg-paper flex flex-col items-center px-4 sm:px-6 py-10">
       <div className="flex items-center gap-2 mb-8">
         <Image
           src="/brand/logo-ink-128.png"
@@ -44,7 +44,7 @@ export default async function OnboardingPage() {
           Вкажіть назву компанії та контакти — це допоможе правильно підписувати задачі та звʼязуватися з вами у випадку інцидентів.
         </p>
 
-        <div className="rounded-xl border border-ink/5 bg-surface shadow-card p-6">
+        <div className="rounded-xl border border-ink/5 bg-surface shadow-card p-5 sm:p-6">
           <OnboardingForm
             defaultCompanyName={existingCompany?.name ?? ''}
             defaultContactEmail={user.email}

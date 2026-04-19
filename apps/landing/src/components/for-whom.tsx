@@ -69,7 +69,7 @@ function PersonaCard({
       }
     >
       {/* Role header */}
-      <div className={`px-8 pt-8 pb-6 border-b ${dark ? 'border-white/8' : 'border-ink/6'}`}>
+      <div className={`px-5 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-6 border-b ${dark ? 'border-white/8' : 'border-ink/6'}`}>
         <h3
           className={`font-display text-2xl font-semibold ${
             dark ? 'text-accent' : 'text-ink'
@@ -100,7 +100,7 @@ function PersonaCard({
       </div>
 
       {/* Benefits list */}
-      <ul className="px-8 py-6 space-y-4 flex-1">
+      <ul className="px-5 py-5 sm:px-8 sm:py-6 space-y-4 flex-1">
         {lines.map((l) => (
           <li key={l} className="flex items-start gap-3">
             <span

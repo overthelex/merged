@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function Privacy() {
   return (
-    <article className="mx-auto max-w-3xl px-6 py-24 prose prose-neutral">
+    <article className="mx-auto w-full max-w-3xl px-6 py-16 sm:py-24 prose prose-neutral break-words">
       <h1>Політика приватності</h1>
       <p>
         merged збирає мінімум даних, необхідних для роботи сервісу: email, імʼя,

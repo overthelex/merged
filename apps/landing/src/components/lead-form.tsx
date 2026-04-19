@@ -91,7 +91,7 @@ export function LeadForm() {
             {status === 'ok' ? (
               <SuccessState />
             ) : (
-              <form onSubmit={onSubmit} className="p-8 sm:p-10 space-y-6">
+              <form onSubmit={onSubmit} className="p-5 sm:p-8 lg:p-10 space-y-6">
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field
                     name="name"
@@ -259,7 +259,7 @@ function TextareaField({
 
 function SuccessState() {
   return (
-    <div className="p-8 sm:p-10 flex flex-col items-center justify-center min-h-[360px] text-center gap-5">
+    <div className="p-5 sm:p-8 lg:p-10 flex flex-col items-center justify-center min-h-[360px] text-center gap-5">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-accent">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
           <path

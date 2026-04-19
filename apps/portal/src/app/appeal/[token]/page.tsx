@@ -60,14 +60,14 @@ export default async function AppealPage({
   }
 
   return (
-    <main className="min-h-screen bg-paper text-ink py-12 px-6">
+    <main className="min-h-screen bg-paper text-ink py-8 sm:py-12 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         <div className="label-mono text-ink-muted mb-2">merged · апеляція</div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight mb-2">
           Не згодні з оцінкою?
         </h1>
         <p className="text-ink-muted mb-6">
-          Задача <code className="font-mono text-sm">{assignment.shortId}</code> · Рівень{' '}
+          Задача <code className="font-mono text-sm break-all">{assignment.shortId}</code> · Рівень{' '}
           <strong className="text-ink">{level}</strong> · Оцінка{' '}
           <strong className="text-ink">{submission.score ?? '—'}/100</strong>
         </p>
@@ -116,7 +116,7 @@ function AlreadySubmitted({
           Апеляцію вже отримано
         </h1>
         <p className="text-ink-muted text-sm">
-          По задачі <code className="font-mono">{shortId}</code> ({level}, оцінка{' '}
+          По задачі <code className="font-mono break-all">{shortId}</code> ({level}, оцінка{' '}
           {score ?? '—'}/100) апеляцію подано. Повторно скористатися цим посиланням не можна —
           відкрийте новий PR у вашому форку.
         </p>

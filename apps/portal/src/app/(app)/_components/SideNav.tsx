@@ -2,19 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-const items = [
-  { key: 'assignments', label: 'Задачі', href: '/assignments', match: (p: string) => p === '/' || p.startsWith('/assignments') },
-  { key: 'candidates', label: 'Кандидати', href: '/candidates', match: (p: string) => p.startsWith('/candidates') },
-  { key: 'settings', label: 'Налаштування', href: '/settings', match: (p: string) => p.startsWith('/settings') },
-] as const;
+import { navItems } from './navItems';
 
 export function SideNav() {
   const pathname = usePathname() ?? '/';
   return (
-    <nav className="w-56 shrink-0 border-r border-ink/5 px-4 py-6">
+    <nav
+      aria-label="Основна навігація"
+      className="hidden md:block w-56 shrink-0 border-r border-ink/5 px-4 py-6"
+    >
       <ul className="flex flex-col gap-1">
-        {items.map((it) => {
+        {navItems.map((it) => {
           const isActive = it.match(pathname);
           return (
             <li key={it.key}>

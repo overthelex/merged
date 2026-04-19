@@ -38,7 +38,7 @@ export function DeleteButton({
       </div>
       <p className="text-xs text-red-900/80 leading-relaxed mb-3">
         Ми спробуємо видалити форк у GitHub organization і приберемо задачу з порталу. Дію неможливо скасувати. Щоб підтвердити, введіть{' '}
-        <span className="font-mono">{shortRepo}</span>.
+        <span className="font-mono break-all">{shortRepo}</span>.
       </p>
       <input
         type="text"
@@ -48,7 +48,7 @@ export function DeleteButton({
         autoFocus
         className="w-full h-10 px-3 rounded-md border border-red-200 bg-surface text-ink placeholder:text-ink-muted/60 focus:outline-none focus:border-red-500 font-mono text-xs"
       />
-      <div className="flex items-center justify-end gap-2 mt-3">
+      <div className="flex flex-wrap items-center justify-end gap-2 mt-3">
         <button
           type="button"
           onClick={() => {
