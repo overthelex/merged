@@ -28,6 +28,7 @@ export const metadata: Metadata = {
   },
   description:
     'Замість leetcode-інтервʼю — калібрована задача в реальному репо. Кандидат робить PR, ми оцінюємо автоматично по рубриці. AI дозволений — задачі спроєктовані так, що він необхідний, але недостатній.',
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'uk_UA',
@@ -35,6 +36,26 @@ export const metadata: Metadata = {
     siteName: 'merged',
   },
   robots: { index: true, follow: true },
+};
+
+const orgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'merged',
+  url: 'https://merged.com.ua',
+  logo: 'https://merged.com.ua/brand/logo-ink-128.png',
+  sameAs: [] as string[],
+  email: 'request@merged.com.ua',
+  areaServed: 'UA',
+};
+
+const siteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'merged',
+  url: 'https://merged.com.ua',
+  inLanguage: 'uk-UA',
+  publisher: { '@type': 'Organization', name: 'merged' },
 };
 
 export const viewport: Viewport = {
@@ -46,7 +67,19 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="uk" className={`${inter.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        {children}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
+      </body>
     </html>
   );
 }

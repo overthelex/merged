@@ -1,4 +1,11 @@
-export const metadata = { title: 'Приватність' };
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Приватність',
+  description:
+    'merged збирає мінімум даних, необхідних для скринінгу. Сервер у ЄС (AWS eu-central-1). Запит на видалення даних — request@merged.com.ua.',
+  alternates: { canonical: '/privacy' },
+};
 
 export default function Privacy() {
   return (
