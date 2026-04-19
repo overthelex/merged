@@ -3,15 +3,14 @@ import {
   heading,
   paragraph,
   button,
-  label,
-  monoBox,
+  muted,
+  divider,
   escapeHtml,
 } from '../layout';
 
 export type SubmissionScoredInput = {
   brandUrl: string;
   logoUrl: string;
-  portalUrl: string;
   assignmentUrl: string;
   prUrl: string;
   prNumber: number;
@@ -21,15 +20,12 @@ export type SubmissionScoredInput = {
   sourceRepo: string;
   seniorityLabel: string;
   shortId: string;
+  appealUrl: string | null;
 };
 
 export function renderSubmissionScored(
   input: SubmissionScoredInput,
 ): { subject: string; html: string } {
-  const author = input.githubUsername
-    ? `<strong>@${escapeHtml(input.githubUsername)}</strong>`
-    : 'кандидата';
-
   const rubricRows = input.rubric
     .map(
       (r) =>
@@ -40,22 +36,33 @@ export function renderSubmissionScored(
     )
     .join('');
 
+  const appealBlock = input.appealUrl
+    ? [
+        divider(),
+        paragraph(
+          `<strong>Не згодні з оцінкою?</strong> Ви можете подати апеляцію й пройти задачу ще раз. Коротко опишіть, що, на вашу думку, було оцінено невірно — ми повернемо задачу в статус «in progress», і ви зможете відкрити новий PR.`,
+        ),
+        button('Подати апеляцію', input.appealUrl),
+        muted('Посилання одноразове й привʼязане саме до цієї оцінки.'),
+      ].join('')
+    : '';
+
   const body = [
-    heading(`Оцінка: ${input.score} / 100`),
+    heading(`Ваша оцінка: ${input.score} / 100`),
     paragraph(
-      `Автоматичне оцінювання PR #${input.prNumber} від ${author} у задачі <strong>${escapeHtml(input.shortId)}</strong> (${escapeHtml(input.seniorityLabel)}, ${escapeHtml(input.sourceRepo)}) завершено.`,
+      `Автоматичне оцінювання PR #${input.prNumber} у задачі <strong>${escapeHtml(input.shortId)}</strong> (${escapeHtml(input.seniorityLabel)}, ${escapeHtml(input.sourceRepo)}) завершено. Нижче — розбивка по критеріях.`,
     ),
     input.rubric.length
       ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-top:1px solid rgba(11,15,23,0.08);border-bottom:1px solid rgba(11,15,23,0.08);margin:10px 0 18px 0;">${rubricRows}</table>`
       : '',
     button(`Відкрити PR #${input.prNumber}`, input.prUrl),
-    button('Відкрити задачу', input.assignmentUrl),
+    appealBlock,
   ]
     .filter(Boolean)
     .join('');
 
   return {
-    subject: `Оцінка ${input.score}/100 — PR #${input.prNumber} · задача ${input.shortId}`,
+    subject: `Ваша оцінка: ${input.score}/100 — задача ${input.shortId}`,
     html: renderLayout({
       preview: `Оцінка ${input.score}/100 по задачі ${input.shortId}.`,
       brandUrl: input.brandUrl,
