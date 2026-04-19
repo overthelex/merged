@@ -34,7 +34,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url,
       type: 'article',
       publishedTime: article.publishedAt,
+      modifiedTime: article.publishedAt,
       tags: article.tags,
+      authors: ['merged'],
+      siteName: 'merged',
     },
     twitter: {
       card: 'summary_large_image',
@@ -60,6 +63,29 @@ export default async function ArticlePage({ params }: PageProps) {
   const url = `https://merged.com.ua/blog/${article.slug}`;
   // Strip leading H1 — we render the title in the banner.
   const body = article.content.replace(/^#\s+.+\n+/, '');
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: article.title,
+    description: article.punchline,
+    url,
+    datePublished: article.publishedAt,
+    dateModified: article.publishedAt,
+    inLanguage: 'uk-UA',
+    keywords: article.tags.join(', '),
+    articleSection: CATEGORY_LABEL[article.category],
+    author: { '@type': 'Organization', name: 'merged', url: 'https://merged.com.ua' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'merged',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://merged.com.ua/brand/logo-ink-128.png',
+      },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+  };
 
   return (
     <div className="min-h-screen bg-paper flex flex-col">
@@ -175,6 +201,12 @@ export default async function ArticlePage({ params }: PageProps) {
 
       <div className="flex-1" />
       <Footer />
+
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </div>
   );
 }

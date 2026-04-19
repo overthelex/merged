@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Блог · про скринінг інженерів у AI-ері',
   description:
     'Есеї merged про наймання в AI-ері: work-sample assessment, LLM-судді, рубрики, практика закритої бети.',
+  alternates: { canonical: '/blog' },
   openGraph: {
     title: 'merged — блог',
     description:

@@ -1,4 +1,11 @@
-export const metadata = { title: 'Умови' };
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Умови',
+  description:
+    'Умови використання merged. Закрита бета, сервіс «як є», оплата не стягується. Замовник відповідає за згоду кандидата на обробку даних.',
+  alternates: { canonical: '/terms' },
+};
 
 export default function Terms() {
   return (
