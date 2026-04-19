@@ -102,7 +102,7 @@ export default async function ArticlePage({ params }: PageProps) {
       />
 
       {/* Banner + title */}
-      <div className="section-inner max-w-3xl mt-8">
+      <div className="mx-auto w-full max-w-3xl px-6 mt-8">
         <div className="relative h-52 sm:h-72 w-full overflow-hidden rounded-2xl shadow-card-md">
           <AttractorBanner seed={article.slug} className="absolute inset-0" animate />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent pointer-events-none" />
@@ -115,7 +115,7 @@ export default async function ArticlePage({ params }: PageProps) {
       </div>
 
       {/* Meta */}
-      <div className="section-inner max-w-3xl mt-6 flex items-center gap-3 flex-wrap">
+      <div className="mx-auto w-full max-w-3xl px-6 mt-6 flex items-center gap-3 flex-wrap">
         <span className="label-mono px-2 py-0.5 rounded-md bg-accent/10 text-accent-dim border border-accent/20">
           {CATEGORY_LABEL[article.category]}
         </span>
@@ -128,7 +128,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
       {/* Content */}
       <article
-        className="section-inner max-w-3xl py-10 sm:py-14 prose prose-neutral prose-lg
+        className="mx-auto w-full max-w-3xl px-6 py-10 sm:py-14 prose prose-neutral prose-lg
           prose-headings:font-display prose-headings:tracking-tight prose-headings:text-ink
           prose-h2:mt-12 prose-h2:mb-5 prose-h2:text-[1.75rem] prose-h2:font-semibold
           prose-h3:mt-9 prose-h3:mb-3 prose-h3:text-[1.25rem] prose-h3:font-semibold
@@ -149,7 +149,7 @@ export default async function ArticlePage({ params }: PageProps) {
       </article>
 
       {/* Tags */}
-      <div className="section-inner max-w-3xl">
+      <div className="mx-auto w-full max-w-3xl px-6">
         <div className="flex flex-wrap gap-2 pb-8 border-t border-ink/8 pt-6">
           {article.tags.map((tag) => (
             <span
