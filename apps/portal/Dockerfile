@@ -7,6 +7,8 @@ COPY apps/portal/package.json apps/portal/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/github-app/package.json packages/github-app/package.json
 COPY packages/email/package.json packages/email/package.json
+COPY packages/task-composer/package.json packages/task-composer/package.json
+COPY packages/task-spec/package.json packages/task-spec/package.json
 RUN pnpm install --frozen-lockfile --filter @merged/portal...
 
 FROM node:20-alpine AS build
@@ -17,11 +19,15 @@ COPY --from=deps /repo/apps/portal/node_modules ./apps/portal/node_modules
 COPY --from=deps /repo/packages/db/node_modules ./packages/db/node_modules
 COPY --from=deps /repo/packages/github-app/node_modules ./packages/github-app/node_modules
 COPY --from=deps /repo/packages/email/node_modules ./packages/email/node_modules
+COPY --from=deps /repo/packages/task-composer/node_modules ./packages/task-composer/node_modules
+COPY --from=deps /repo/packages/task-spec/node_modules ./packages/task-spec/node_modules
 COPY pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/portal ./apps/portal
 COPY packages/db ./packages/db
 COPY packages/github-app ./packages/github-app
 COPY packages/email ./packages/email
+COPY packages/task-composer ./packages/task-composer
+COPY packages/task-spec ./packages/task-spec
 # Build-time placeholders — these let Next collect page data without connecting
 # to real services. Runtime env (from .env.portal) overrides them in production.
 ENV DATABASE_URL=postgres://build:build@localhost:5432/build \

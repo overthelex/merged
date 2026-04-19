@@ -24,6 +24,7 @@ import {
   renderAssignmentMarkdown,
   renderRunnerScript,
 } from '@/lib/assignmentTemplate';
+import { composeAssignmentFromRepo, ComposeError } from '@/lib/compose';
 import {
   sendAssignmentCreatedEmail,
   seniorityLabel,
@@ -128,14 +129,36 @@ export async function createAssignment(
       const source = await parseGitHubUrl(parsed.data.repoUrl);
       const fork = await forkRepo(gh, source, forkName);
       await protectMain(gh, forkName, fork.defaultBranch);
-      await seedAssessmentBranch(gh, {
-        forkName,
-        defaultBranch: fork.defaultBranch,
-        assignmentMarkdown: renderAssignmentMarkdown({
+
+      // Run Scout → Composer → Calibrator against the source repo (identical
+      // content to the fresh fork). A Bedrock/pipeline failure must not block
+      // the HR flow — fall back to the hardcoded template.
+      const composed = await safeCompose({
+        repoUrl: parsed.data.repoUrl,
+        accessToken: parsed.data.accessKey || undefined,
+        seniority: parsed.data.seniority as Seniority,
+        assignmentId: row.id,
+      });
+      const assignmentMarkdown =
+        composed?.assignmentMd ??
+        renderAssignmentMarkdown({
           seniority: parsed.data.seniority as Seniority,
           shortId: sid,
           portalUrl,
-        }),
+        });
+      if (composed) {
+        console.info('compose.ok', {
+          assignmentId: row.id,
+          taskId: composed.pipeline.spec.id,
+          revisions: composed.pipeline.verdicts.length,
+          surfaces: composed.pipeline.surfaces.length,
+        });
+      }
+
+      await seedAssessmentBranch(gh, {
+        forkName,
+        defaultBranch: fork.defaultBranch,
+        assignmentMarkdown,
         runnerShellScript: renderRunnerScript(),
       });
 
@@ -147,11 +170,17 @@ export async function createAssignment(
         })
         .where(eq(assignments.id, row.id));
     } catch (err) {
-      console.error('fork flow failed', { assignmentId: row.id, err });
+      // Log only the safe summary — never raw Octokit errors, which may
+      // carry authorization headers in their serialised form.
+      console.error('fork flow failed', {
+        assignmentId: row.id,
+        errName: err instanceof Error ? err.name : 'unknown',
+        errMessage: err instanceof Error ? err.message : String(err),
+      });
       return {
         ok: false,
         message:
-          'Не вдалося створити форк. Перевірте URL і доступ, або спробуйте ще раз. Задачу збережено зі статусом pending_fork.',
+          'Не вдалося створити задачу. Перевірте URL і доступ або спробуйте ще раз. Задачу збережено зі статусом pending_fork.',
       };
     }
   } else {
@@ -185,4 +214,28 @@ export async function createAssignment(
   });
 
   redirect(`/assignments/${row.id}`);
+}
+
+async function safeCompose(opts: {
+  repoUrl: string;
+  accessToken?: string;
+  seniority: Seniority;
+  assignmentId: string;
+}) {
+  try {
+    return await composeAssignmentFromRepo({
+      repoUrl: opts.repoUrl,
+      accessToken: opts.accessToken,
+      seniority: opts.seniority,
+    });
+  } catch (err) {
+    const stage = err instanceof ComposeError ? err.stage : 'unknown';
+    console.error('compose failed — falling back to template', {
+      assignmentId: opts.assignmentId,
+      stage,
+      errName: err instanceof Error ? err.name : 'unknown',
+      errMessage: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
 }
