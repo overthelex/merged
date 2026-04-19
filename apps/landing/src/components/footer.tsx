@@ -22,10 +22,10 @@ export function Footer() {
           <div className="flex flex-col gap-2">
             <p className="label-mono text-ink/35 mb-1">Звʼязок</p>
             <a
-              href="mailto:hello@merged.legal.org.ua"
+              href="mailto:request@merged.com.ua"
               className="font-mono text-sm text-ink/55 hover:text-ink transition-colors duration-150 focus-visible:underline"
             >
-              hello@merged.legal.org.ua
+              request@merged.com.ua
             </a>
             <a
               href="/blog/"

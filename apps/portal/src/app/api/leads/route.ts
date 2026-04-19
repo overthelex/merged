@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createHash } from 'node:crypto';
 import { getDb, leads } from '@merged/db';
+import { sendLeadReceivedEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -77,6 +78,20 @@ export async function POST(req: Request) {
         userAgent,
       })
       .returning({ id: leads.id });
+
+    // Fire-and-forget notification to request@merged.com.ua. We don't block
+    // the response on delivery — the row is already persisted and a late
+    // email failure shouldn't turn a successful submit into an error.
+    void sendLeadReceivedEmail({
+      lead: {
+        email: parsed.data.email,
+        name: parsed.data.name ?? null,
+        company: parsed.data.company ?? null,
+        role: parsed.data.role ?? null,
+        note: parsed.data.note ?? null,
+        source: parsed.data.source ?? 'landing',
+      },
+    });
 
     return NextResponse.json({ ok: true, id: row!.id }, { status: 201, headers: cors });
   } catch (err) {

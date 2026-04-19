@@ -11,7 +11,7 @@ export default function Privacy() {
         (Франкфурт, AWS eu-central-1).
       </p>
       <p>
-        Запит на видалення даних — <a href="mailto:privacy@merged.legal.org.ua">privacy@merged.legal.org.ua</a>.
+        Запит на видалення даних — <a href="mailto:request@merged.com.ua">request@merged.com.ua</a>.
       </p>
     </article>
   );

@@ -11,6 +11,7 @@ import {
   renderCandidateAccepted,
   renderSubmissionReceived,
   renderSubmissionScored,
+  renderLeadReceived,
   type SendResult,
 } from '@merged/email';
 import { getPortalUrl } from './urls';
@@ -234,6 +235,49 @@ export async function sendSubmissionScoredEmail(input: {
     shortId: input.shortId,
   });
   await safeSend('submission_scored', input.to, rendered);
+}
+
+export async function sendLeadReceivedEmail(input: {
+  lead: {
+    email: string;
+    name: string | null;
+    company: string | null;
+    role: string | null;
+    note: string | null;
+    source: string;
+  };
+  submittedAt?: Date;
+}): Promise<void> {
+  const cfg = config();
+  const to = (process.env.LEADS_NOTIFY_TO?.trim() || 'request@merged.com.ua')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const rendered = renderLeadReceived({
+    brandUrl: cfg?.brandUrl ?? 'https://merged.com.ua',
+    logoUrl:
+      cfg?.logoUrl ?? 'https://portal.merged.com.ua/brand/logo-ink-128.png',
+    lead: input.lead,
+    submittedAt: input.submittedAt ?? new Date(),
+  });
+  // Reply-to is the lead's own email so recruiter can answer with one click.
+  try {
+    const result = await sendEmail(config(), {
+      to,
+      subject: rendered.subject,
+      html: rendered.html,
+      replyTo: input.lead.email,
+    });
+    if (result.ok) {
+      console.info('[email] sent', { label: 'lead_received', id: result.id });
+    } else if ('skipped' in result && result.skipped) {
+      console.info('[email] skip', { label: 'lead_received', reason: result.reason });
+    } else {
+      console.error('[email] send failed', { label: 'lead_received', error: result.error });
+    }
+  } catch (err) {
+    console.error('[email] send threw', { label: 'lead_received', err });
+  }
 }
 
 export function seniorityLabel(v: string): string {
