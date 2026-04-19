@@ -1,7 +1,7 @@
 import { safeParseTaskSpec, type Level, type TaskSpec } from '@merged/task-spec';
 import { extractJson, invokeBedrock } from './bedrock';
 import {
-  CalibratorVerdictSchema,
+  LlmCoherenceSchema,
   type CalibratorVerdict,
   type ComposerDraft,
 } from './types';
@@ -30,11 +30,12 @@ export interface CalibratorResult {
  * Two-stage calibration:
  *  1. Deterministic schema validation via `@merged/task-spec` — cheap, catches
  *     malformed YAML, rubric-weight-sum errors, duplicate keys.
- *  2. LLM coherence check — does the task actually match the level? Are seeds
+ *  2. LLM coherence check — does the task match the level? Are seeds
  *     distinguishable? Is `time_limit_min` plausible? Does ASSIGNMENT.md
  *     agree with `task.yaml`?
  *
- * The verdict is `ok` only if BOTH stages pass.
+ * `spec` is populated whenever the schema stage passes, even if the LLM
+ * later rejects — callers can inspect the parsed spec for diagnostics.
  */
 export async function runCalibrator(
   inputs: CalibratorInputs,
@@ -53,18 +54,20 @@ export async function runCalibrator(
     }
   } else {
     for (const issue of schema.issues) {
-      schemaErrors.push(`${issue.path.join('.') || '(root)'}: ${issue.message}`);
+      const path = issue.path.map(String).join('.') || '(root)';
+      schemaErrors.push(`${path}: ${issue.message}`);
     }
   }
 
-  // If schema is wrong, no point burning Opus on coherence — fail fast.
   if (schemaErrors.length > 0) {
     return {
       verdict: {
         ok: false,
         schema_errors: schemaErrors.slice(0, 30),
         coherence_notes: [],
+        task_id: spec?.id,
       },
+      spec,
     };
   }
 
@@ -77,8 +80,23 @@ export async function runCalibrator(
     temperature: 0.1,
     maxRetries: cfg.maxRetries,
   });
-  const json = extractJson(text);
-  const parsed = CalibratorVerdictSchema.safeParse(json);
+
+  let json: unknown;
+  try {
+    json = extractJson(text);
+  } catch (e) {
+    return {
+      verdict: {
+        ok: false,
+        schema_errors: [],
+        coherence_notes: [`calibrator response unparseable: ${(e as Error).message}`],
+        task_id: spec?.id,
+      },
+      spec,
+    };
+  }
+
+  const parsed = LlmCoherenceSchema.safeParse(json);
   if (!parsed.success) {
     return {
       verdict: {
@@ -87,18 +105,23 @@ export async function runCalibrator(
         coherence_notes: [
           `calibrator response failed schema: ${parsed.error.issues[0]?.message}`,
         ],
+        task_id: spec?.id,
       },
       spec,
     };
   }
 
-  const verdict: CalibratorVerdict = {
-    ok: parsed.data.ok && parsed.data.coherence_notes.length === 0,
-    schema_errors: [],
-    coherence_notes: parsed.data.coherence_notes,
-    task_id: spec?.id,
+  const hasNotes = parsed.data.coherence_notes.length > 0;
+  const ok = parsed.data.ok && !hasNotes;
+  return {
+    verdict: {
+      ok,
+      schema_errors: [],
+      coherence_notes: ok ? [] : parsed.data.coherence_notes,
+      task_id: spec?.id,
+    },
+    spec,
   };
-  return { verdict, spec };
 }
 
 function buildCalibratorPrompt(inputs: CalibratorInputs): string {

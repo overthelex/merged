@@ -22,6 +22,9 @@ export {
   ScoutReportSchema,
   ComposerDraftSchema,
   CalibratorVerdictSchema,
+  LlmCoherenceSchema,
+  RepoFileSchema,
+  RepoMetaSchema,
   SURFACE_KIND,
 } from './types';
 export type {
@@ -30,6 +33,7 @@ export type {
   ScoutReport,
   ComposerDraft,
   CalibratorVerdict,
+  LlmCoherence,
   RepoFile,
   RepoMeta,
 } from './types';

@@ -9,12 +9,16 @@ export const SURFACE_KIND = [
   'docs',
   'perf',
   'security',
+  'api_design',
+  'error_handling',
+  'concurrency',
+  'data_model',
 ] as const;
 export type SurfaceKind = (typeof SURFACE_KIND)[number];
 
 export const SurfaceSchema = z.object({
   kind: z.enum(SURFACE_KIND),
-  path: z.string().min(1).max(400),
+  path: z.string().min(1).max(255),
   title: z.string().min(3).max(160),
   summary: z.string().min(10).max(800),
   estimated_effort_min: z.number().int().min(15).max(480),
@@ -24,44 +28,83 @@ export const SurfaceSchema = z.object({
 });
 export type Surface = z.infer<typeof SurfaceSchema>;
 
+/**
+ * Each worker is prompt-pinned to ≤8 surfaces; `max(20)` leaves some
+ * headroom for small over-production without inflating token budgets.
+ */
 export const ScoutReportSchema = z.object({
-  surfaces: z.array(SurfaceSchema).max(40),
+  surfaces: z.array(SurfaceSchema).max(20),
   notes: z.string().max(2000).optional(),
 });
 export type ScoutReport = z.infer<typeof ScoutReportSchema>;
 
+/**
+ * A valid task.yaml is at minimum ~300 chars (version, id, title, level,
+ * description_md≥20, 3 seeds, 3 rubric criteria summing to 100). `min(200)`
+ * is a cheap pre-Calibrator filter; authoritative validation still happens
+ * in `safeParseTaskSpec` inside the Calibrator.
+ */
 export const ComposerDraftSchema = z.object({
-  /** Raw task.yaml contents — validated by the Calibrator, not here. */
-  task_yaml: z.string().min(40).max(40_000),
-  /** ASSIGNMENT.md for the fork's assessment branch. */
-  assignment_md: z.string().min(40).max(40_000),
-  /** Composer's explanation of design choices — kept for audit, not shown to candidate. */
+  task_yaml: z.string().min(200).max(40_000),
+  assignment_md: z.string().min(80).max(40_000),
   design_notes: z.string().max(4000).optional(),
 });
 export type ComposerDraft = z.infer<typeof ComposerDraftSchema>;
 
-export const CalibratorVerdictSchema = z.object({
+/** Shape the LLM is asked to emit — only ok + coherence_notes. */
+export const LlmCoherenceSchema = z.object({
   ok: z.boolean(),
-  schema_errors: z.array(z.string().max(500)).max(30),
   coherence_notes: z.array(z.string().max(500)).max(30),
-  /** If ok=true, the parsed & validated TaskSpec id. Otherwise omitted. */
-  task_id: z.string().optional(),
 });
+export type LlmCoherence = z.infer<typeof LlmCoherenceSchema>;
+
+/** Final verdict produced by the calibrator. Enforces ok ⇔ no issues. */
+export const CalibratorVerdictSchema = z
+  .object({
+    ok: z.boolean(),
+    schema_errors: z.array(z.string().max(500)).max(30),
+    coherence_notes: z.array(z.string().max(500)).max(30),
+    /** Set whenever the YAML passes `safeParseTaskSpec`, even if LLM later rejects. */
+    task_id: z.string().optional(),
+  })
+  .superRefine((val, ctx) => {
+    const hasIssues = val.schema_errors.length > 0 || val.coherence_notes.length > 0;
+    if (val.ok && hasIssues) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'ok=true but schema_errors/coherence_notes is non-empty',
+        path: ['ok'],
+      });
+    }
+    if (!val.ok && !hasIssues) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'ok=false but no schema_errors or coherence_notes provided',
+        path: ['ok'],
+      });
+    }
+  });
 export type CalibratorVerdict = z.infer<typeof CalibratorVerdictSchema>;
 
-export interface RepoFile {
-  /** Path relative to repo root. */
-  path: string;
-  size: number;
-  content: string;
-}
+/**
+ * Repo files scanned from disk. `content` bounded so future non-scanRepo
+ * callers can't blow the Scout chunk budget.
+ */
+export const RepoFileSchema = z.object({
+  path: z.string().min(1).max(255),
+  size: z.number().int().min(0),
+  content: z.string().max(10_000),
+});
+export type RepoFile = z.infer<typeof RepoFileSchema>;
 
-export interface RepoMeta {
-  name: string;
-  /** Detected primary language tags, e.g. ["typescript", "python"]. */
-  languages: string[];
-  /** Total source files counted after filtering. */
-  fileCount: number;
-  /** Total bytes of source content after filtering. */
-  totalSize: number;
-}
+export const RepoMetaSchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .max(80)
+    .regex(/^[A-Za-z0-9._\-/]+$/, 'letters, digits, dot, hyphen, underscore, slash'),
+  languages: z.array(z.string().max(40)).max(8),
+  fileCount: z.number().int().min(0),
+  totalSize: z.number().int().min(0),
+});
+export type RepoMeta = z.infer<typeof RepoMetaSchema>;

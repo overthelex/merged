@@ -19,7 +19,8 @@ export interface ScoutConfig {
 const DEFAULT_SCOUT_MODEL =
   process.env.BEDROCK_SCOUT_MODEL_ID ?? 'eu.anthropic.claude-haiku-4-5-v1:0';
 
-const MAX_CHUNK_CHARS = 90_000;
+const MAX_CHUNK_CHARS = 70_000;
+const TOP_SURFACES = 20;
 
 export interface ScoutInputs {
   files: RepoFile[];
@@ -29,8 +30,10 @@ export interface ScoutInputs {
 
 /**
  * Run one Scout worker per chunk in parallel (capped by `maxWorkers`,
- * default 10). Each worker returns a partial {@link ScoutReport}; we merge
- * and rank by the LLM's self-assigned score.
+ * default 10). Uses `allSettled` so a single worker failure doesn't kill
+ * the whole run. Post-hoc path validation drops surfaces whose `path`
+ * isn't in the worker's chunk. Falls back to unfiltered surfaces when
+ * the fit_levels filter strips everything.
  */
 export async function runScout(inputs: ScoutInputs, cfg: ScoutConfig = {}): Promise<ScoutReport> {
   const chunks = partitionFiles(inputs.files, cfg.maxWorkers ?? 10);
@@ -38,24 +41,39 @@ export async function runScout(inputs: ScoutInputs, cfg: ScoutConfig = {}): Prom
     return { surfaces: [], notes: 'repo had no source files after filtering' };
   }
 
-  const workerReports = await Promise.all(
+  const settled = await Promise.allSettled(
     chunks.map((chunk, idx) =>
       runWorker({ chunk, idx, total: chunks.length, meta: inputs.meta, level: inputs.level }, cfg),
     ),
   );
 
-  const surfaces: Surface[] = workerReports
-    .flatMap((r) => r.surfaces)
-    .filter((s) => s.fit_levels.includes(inputs.level))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 20);
+  const reports: ScoutReport[] = [];
+  const failedNotes: string[] = [];
+  settled.forEach((res, i) => {
+    if (res.status === 'fulfilled') {
+      reports.push(res.value);
+    } else {
+      const msg = res.reason instanceof Error ? res.reason.message : String(res.reason);
+      failedNotes.push(`worker ${i} failed: ${truncateNote(msg)}`);
+    }
+  });
 
-  const notes = workerReports
+  const allSurfaces: Surface[] = reports.flatMap((r) => r.surfaces);
+  const levelFit = allSurfaces.filter((s) => s.fit_levels.includes(inputs.level));
+  const chosen = levelFit.length > 0 ? levelFit : allSurfaces;
+  const surfaces = chosen.sort((a, b) => b.score - a.score).slice(0, TOP_SURFACES);
+
+  const workerNotes = reports
     .map((r, i) => (r.notes ? `worker ${i}: ${r.notes}` : null))
-    .filter(Boolean)
-    .join(' · ');
+    .filter(Boolean) as string[];
+  const allNotes = [...workerNotes, ...failedNotes];
+  const notes = allNotes.length > 0 ? allNotes.join(' · ') : undefined;
 
-  return { surfaces, notes: notes || undefined };
+  if (surfaces.length === 0 && failedNotes.length === settled.length) {
+    throw new Error(`all ${settled.length} scout workers failed · ${notes}`);
+  }
+
+  return { surfaces, notes };
 }
 
 interface WorkerArgs {
@@ -76,7 +94,19 @@ async function runWorker(args: WorkerArgs, cfg: ScoutConfig): Promise<ScoutRepor
     temperature: 0.2,
     maxRetries: cfg.maxRetries,
   });
-  const json = extractJson(text);
+
+  let json: unknown;
+  try {
+    json = extractJson(text);
+  } catch (e) {
+    return {
+      surfaces: [],
+      notes: `worker ${args.idx} returned unparseable output: ${truncateNote(
+        (e as Error).message,
+      )}`,
+    };
+  }
+
   const parsed = ScoutReportSchema.safeParse(json);
   if (!parsed.success) {
     return {
@@ -84,14 +114,32 @@ async function runWorker(args: WorkerArgs, cfg: ScoutConfig): Promise<ScoutRepor
       notes: `worker ${args.idx} produced invalid scout report: ${parsed.error.issues[0]?.message}`,
     };
   }
-  return parsed.data;
+
+  // Post-hoc path validation — the LLM is told to use "a real file from
+  // this slice" but nothing in the protocol enforces it.
+  const chunkPaths = new Set(args.chunk.map((f) => f.path));
+  const kept: Surface[] = [];
+  let dropped = 0;
+  for (const s of parsed.data.surfaces) {
+    if (chunkPaths.has(s.path)) kept.push(s);
+    else dropped++;
+  }
+  const notes = dropped
+    ? [parsed.data.notes, `worker ${args.idx} dropped ${dropped} hallucinated paths`]
+        .filter(Boolean)
+        .join(' · ')
+    : parsed.data.notes;
+
+  return { surfaces: kept, notes };
 }
 
-function buildScoutPrompt({ chunk, idx, total, meta, level }: WorkerArgs): string {
+function buildScoutPrompt({ chunk, meta, level }: WorkerArgs): string {
   const fileList = chunk.map((f) => renderFile(f)).join('\n\n');
-  const trimmed = fileList.length > MAX_CHUNK_CHARS
-    ? fileList.slice(0, MAX_CHUNK_CHARS) + `\n…[${fileList.length - MAX_CHUNK_CHARS} chars dropped]`
-    : fileList;
+  const trimmed =
+    fileList.length > MAX_CHUNK_CHARS
+      ? fileList.slice(0, MAX_CHUNK_CHARS) +
+        `\n…[${fileList.length - MAX_CHUNK_CHARS} chars dropped]`
+      : fileList;
 
   return [
     SCOUT_PREAMBLE,
@@ -99,7 +147,7 @@ function buildScoutPrompt({ chunk, idx, total, meta, level }: WorkerArgs): strin
     `Repository: ${meta.name}`,
     `Primary languages: ${meta.languages.join(', ') || 'unknown'}`,
     `Target seniority: ${level}`,
-    `You are worker ${idx + 1} of ${total}. You see only a slice of the repo.`,
+    `You see a representative slice of the repo, not all of it.`,
     '',
     '## Files in this slice',
     trimmed,
@@ -110,7 +158,7 @@ function buildScoutPrompt({ chunk, idx, total, meta, level }: WorkerArgs): strin
     '{',
     '  "surfaces": [',
     '    {',
-    '      "kind": "missing_tests|feature_gap|bug|refactor|docs|perf|security",',
+    '      "kind": "missing_tests|feature_gap|bug|refactor|docs|perf|security|api_design|error_handling|concurrency|data_model",',
     '      "path": "<repo-relative path, must be a real file from this slice>",',
     '      "title": "<short, actionable>",',
     '      "summary": "<2-4 sentences: what, why it\'s a good screening task>",',
@@ -125,6 +173,7 @@ function buildScoutPrompt({ chunk, idx, total, meta, level }: WorkerArgs): strin
     'Rules:',
     '- Return at most 8 surfaces per worker. Quality over quantity.',
     '- Prefer surfaces that fit the target seniority.',
+    '- `path` MUST be one of the files shown in this slice, verbatim.',
     '- Skip vague suggestions ("add more tests") — point to a specific file/function.',
     '- A good surface is small enough to finish in one sitting and teaches us about the candidate.',
     '- No Markdown outside the JSON fence.',
@@ -141,4 +190,8 @@ A good screening task:
 
 function renderFile(f: RepoFile): string {
   return `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``;
+}
+
+function truncateNote(s: string): string {
+  return s.length > 200 ? s.slice(0, 200) + '…' : s;
 }

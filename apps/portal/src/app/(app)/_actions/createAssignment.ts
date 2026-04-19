@@ -24,7 +24,7 @@ import {
   renderAssignmentMarkdown,
   renderRunnerScript,
 } from '@/lib/assignmentTemplate';
-import { composeAssignmentFromRepo } from '@/lib/compose';
+import { composeAssignmentFromRepo, ComposeError } from '@/lib/compose';
 import {
   sendAssignmentCreatedEmail,
   seniorityLabel,
@@ -170,11 +170,17 @@ export async function createAssignment(
         })
         .where(eq(assignments.id, row.id));
     } catch (err) {
-      console.error('fork flow failed', { assignmentId: row.id, err });
+      // Log only the safe summary — never raw Octokit errors, which may
+      // carry authorization headers in their serialised form.
+      console.error('fork flow failed', {
+        assignmentId: row.id,
+        errName: err instanceof Error ? err.name : 'unknown',
+        errMessage: err instanceof Error ? err.message : String(err),
+      });
       return {
         ok: false,
         message:
-          'Не вдалося створити форк. Перевірте URL і доступ, або спробуйте ще раз. Задачу збережено зі статусом pending_fork.',
+          'Не вдалося створити задачу. Перевірте URL і доступ або спробуйте ще раз. Задачу збережено зі статусом pending_fork.',
       };
     }
   } else {
@@ -223,9 +229,12 @@ async function safeCompose(opts: {
       seniority: opts.seniority,
     });
   } catch (err) {
+    const stage = err instanceof ComposeError ? err.stage : 'unknown';
     console.error('compose failed — falling back to template', {
       assignmentId: opts.assignmentId,
-      err: err instanceof Error ? err.message : String(err),
+      stage,
+      errName: err instanceof Error ? err.name : 'unknown',
+      errMessage: err instanceof Error ? err.message : String(err),
     });
     return null;
   }
