@@ -1,6 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { getSortedArticles } from '@/lib/articles';
 
+// Required by Next 16 when the app uses `output: 'export'` — otherwise the
+// metadata route is treated as potentially dynamic and the build refuses.
+export const dynamic = 'force-static';
+
 const SITE = 'https://merged.com.ua';
 
 // Emitted with trailing slashes to match our next.config `trailingSlash: true`
