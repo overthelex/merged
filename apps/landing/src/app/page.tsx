@@ -1,3 +1,4 @@
+import { BlogTeaser } from '@/components/blog-teaser';
 import { Hero } from '@/components/hero';
 import { Problem } from '@/components/problem';
 import { HowItWorks } from '@/components/how-it-works';
@@ -18,6 +19,7 @@ export default function Page() {
       <Signals />
       <ForWhom />
       <Objections />
+      <BlogTeaser />
       <LeadForm />
       <Footer />
     </main>
