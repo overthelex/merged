@@ -58,6 +58,13 @@ export const LlmCoherenceSchema = z.object({
 });
 export type LlmCoherence = z.infer<typeof LlmCoherenceSchema>;
 
+/** Shape the Verifier LLM is asked to emit — only ok + issues. */
+export const LlmVerificationSchema = z.object({
+  ok: z.boolean(),
+  issues: z.array(z.string().max(500)).max(30),
+});
+export type LlmVerification = z.infer<typeof LlmVerificationSchema>;
+
 /** Final verdict produced by the calibrator. Enforces ok ⇔ no issues. */
 export const CalibratorVerdictSchema = z
   .object({
@@ -85,6 +92,38 @@ export const CalibratorVerdictSchema = z
     }
   });
 export type CalibratorVerdict = z.infer<typeof CalibratorVerdictSchema>;
+
+/**
+ * Verifier rev'yew of a Calibrator-approved draft. Different remit from
+ * CalibratorVerdict: Verifier reads the task as the candidate will, flagging
+ * ambiguity, seed/description mismatches, broken repo references,
+ * non-gradable rubric criteria, unrealistic time budget, level/stack leaks.
+ * Same invariant: ok ⇔ issues is empty.
+ */
+export const VerifierReportSchema = z
+  .object({
+    ok: z.boolean(),
+    issues: z.array(z.string().max(500)).max(30),
+    /** Copied from spec.id when available, for log correlation. */
+    task_id: z.string().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.ok && val.issues.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'ok=true but issues is non-empty',
+        path: ['ok'],
+      });
+    }
+    if (!val.ok && val.issues.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'ok=false but no issues provided',
+        path: ['ok'],
+      });
+    }
+  });
+export type VerifierReport = z.infer<typeof VerifierReportSchema>;
 
 /**
  * Repo files scanned from disk. `content` bounded so future non-scanRepo
