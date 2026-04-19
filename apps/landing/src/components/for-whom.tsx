@@ -1,8 +1,8 @@
 type Metric = { value: string; label: string };
 
-const RECRUITER_METRICS: Metric[] = [
-  { value: '0', label: 'дзвінків до першого сигналу' },
-  { value: '~2 хв', label: 'на отримання звіту' },
+const DEVELOPER_METRICS: Metric[] = [
+  { value: '0', label: 'live-coding під камерою' },
+  { value: '~2 хв', label: 'від сабміту до звіту' },
 ];
 
 const MANAGER_METRICS: Metric[] = [
@@ -16,21 +16,21 @@ export function ForWhom() {
       <div className="section-inner py-24 sm:py-32">
         <p className="label-mono text-ink/50">Для кого</p>
         <h2 className="mt-5 font-display text-4xl sm:text-5xl font-semibold leading-[1.08] tracking-tight max-w-2xl">
-          Рекрутер — користувач. Hiring&nbsp;manager — платник.
+          Девелопер — користувач. Hiring&nbsp;Manager — платник.
         </h2>
         <p className="mt-5 max-w-xl text-[1.0625rem] text-ink/60 leading-[1.75]">
-          Кожна роль отримує своє: рекрутер — незалежність від сеньйорів,
-          менеджер — час команди і якісніший фінальний відбір.
+          Кожна роль отримує своє: девелопер — чесну асинхронну оцінку без
+          live-coding, менеджер — час команди і якісніший фінальний відбір.
         </p>
 
         <div className="mt-14 grid gap-5 md:grid-cols-2">
           <PersonaCard
-            role="IT-рекрутери"
-            metrics={RECRUITER_METRICS}
+            role="Девелопери"
+            metrics={DEVELOPER_METRICS}
             lines={[
-              'Перестаєш просити сеньйорів «подивитися тестове» за келих кави.',
-              'Маєш обʼєктивний звіт для hiring manager-а ще до першого дзвінка.',
-              'Відсіюєш кандидатів, які не вміють читати документацію і писати тести.',
+              'Не кодиш під стресом за 45 хвилин — береш задачу, робиш у своєму ритмі.',
+              'AI-асистент — не заборонений, а очікуваний. Твій звичний Cursor / Claude / Copilot працює.',
+              'Бачиш рубрику до початку: за що оцінюють, які сигнали важливі. Жодного "vibe check".',
             ]}
           />
           <PersonaCard
