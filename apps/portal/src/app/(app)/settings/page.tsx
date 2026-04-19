@@ -43,16 +43,16 @@ export default async function SettingsPage() {
             defaultContactEmail={user.contactEmail ?? user.email}
             defaultPhone={user.phone ?? ''}
           />
-          <div className="mt-5 pt-5 border-t border-ink/5 flex items-center justify-between">
-            <div>
+          <div className="mt-5 pt-5 border-t border-ink/5 flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
               <div className="text-xs text-ink-muted">Роль</div>
               <div className="text-sm text-ink mt-0.5">
                 {ROLE_LABEL[user.role] ?? user.role}
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right min-w-0">
               <div className="text-xs text-ink-muted">User ID</div>
-              <div className="text-xs font-mono text-ink-muted mt-0.5 tabular">
+              <div className="text-xs font-mono text-ink-muted mt-0.5 tabular break-all">
                 {user.id}
               </div>
             </div>

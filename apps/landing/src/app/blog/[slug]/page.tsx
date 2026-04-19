@@ -169,7 +169,7 @@ export default async function ArticlePage({ params }: PageProps) {
           className="mt-6 block rounded-2xl border border-ink/10 bg-ink text-paper p-6 sm:p-7 no-underline shadow-card-md transition-all duration-200 hover:shadow-card-lg hover:border-ink/25 group"
         >
           <p className="label-mono text-accent mb-2">Спробувати merged</p>
-          <div className="flex items-start justify-between gap-6">
+          <div className="flex items-start justify-between gap-4 sm:gap-6">
             <div>
               <p className="font-display text-xl sm:text-2xl font-semibold text-paper leading-tight">
                 Технічний скринінг без співбесід

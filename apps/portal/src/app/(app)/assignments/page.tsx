@@ -34,8 +34,8 @@ export default async function AssignmentsPage() {
 
   return (
     <div>
-      <div className="flex items-start justify-between mb-8">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+        <div className="min-w-0">
           <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">
             Задачі
           </h1>
@@ -45,7 +45,7 @@ export default async function AssignmentsPage() {
         </div>
         <Link
           href="/assignments/new"
-          className="h-10 inline-flex items-center px-4 rounded-md bg-ink text-surface text-sm font-medium hover:bg-ink-soft transition"
+          className="h-10 inline-flex items-center px-4 rounded-md bg-ink text-surface text-sm font-medium hover:bg-ink-soft transition shrink-0"
         >
           + Нова задача
         </Link>
@@ -55,7 +55,8 @@ export default async function AssignmentsPage() {
         <EmptyState />
       ) : (
         <div className="rounded-xl border border-ink/5 bg-surface overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <div className="-mx-0 overflow-x-auto">
+          <table className="w-full text-sm min-w-[540px]">
             <thead className="bg-surface-dim text-ink-muted">
               <tr>
                 <th className="text-left font-medium px-4 py-3">Репо</th>
@@ -97,6 +98,7 @@ export default async function AssignmentsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

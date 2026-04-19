@@ -99,14 +99,14 @@ function InvitePendingOverlay() {
 function SubmitButton({ forkUrlHint }: { forkUrlHint: string | null }) {
   const { pending } = useFormStatus();
   return (
-    <div className="flex items-center justify-between pt-2">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2">
       <span className="text-xs text-ink-muted">
         {forkUrlHint ? 'Форк готовий — після прийняття отримаєте access' : 'Форк готується…'}
       </span>
       <button
         type="submit"
         disabled={pending}
-        className="h-10 px-5 rounded-md bg-accent text-ink text-sm font-semibold hover:bg-accent-dim hover:text-surface transition disabled:opacity-60"
+        className="h-10 px-5 rounded-md bg-accent text-ink text-sm font-semibold hover:bg-accent-dim hover:text-surface transition disabled:opacity-60 sm:shrink-0"
       >
         {pending ? 'Приймаємо…' : 'Прийняти запрошення'}
       </button>

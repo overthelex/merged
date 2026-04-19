@@ -96,7 +96,7 @@ function Field({
       <div className="text-sm font-medium text-ink mb-1.5">{label}</div>
       {children}
       {hint && !error && (
-        <div className="text-xs text-ink-muted mt-1.5 leading-snug">{hint}</div>
+        <div className="text-xs text-ink-muted mt-1.5 leading-snug break-all">{hint}</div>
       )}
       {error && <div className="text-xs text-red-700 mt-1.5">{error}</div>}
     </label>

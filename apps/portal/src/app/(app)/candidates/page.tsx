@@ -62,8 +62,8 @@ export default async function CandidatesPage() {
       {rows.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="rounded-xl border border-ink/5 bg-surface overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+        <div className="-mx-4 sm:mx-0 rounded-none sm:rounded-xl border-y sm:border border-ink/5 bg-surface overflow-x-auto shadow-card">
+          <table className="w-full text-sm min-w-[560px]">
             <thead className="bg-surface-dim text-ink-muted">
               <tr>
                 <th className="text-left font-medium px-4 py-3">Кандидат</th>
@@ -80,13 +80,13 @@ export default async function CandidatesPage() {
                   key={c.candidateId}
                   className="border-t border-ink/5 hover:bg-surface-dim/50 transition"
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 min-w-0">
                     <Link
                       href={`/candidates/${c.candidateId}`}
-                      className="flex flex-col hover:text-accent-dim transition"
+                      className="flex flex-col hover:text-accent-dim transition min-w-0"
                     >
                       {c.githubUsername ? (
-                        <span className="font-mono text-xs text-ink">
+                        <span className="font-mono text-xs text-ink break-all">
                           @{c.githubUsername}
                         </span>
                       ) : (
@@ -95,7 +95,7 @@ export default async function CandidatesPage() {
                         </span>
                       )}
                       {c.email && (
-                        <span className="text-ink-muted text-xs mt-0.5">
+                        <span className="text-ink-muted text-xs mt-0.5 break-all">
                           {c.email}
                         </span>
                       )}

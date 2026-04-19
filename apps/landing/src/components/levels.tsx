@@ -67,7 +67,7 @@ export function Levels() {
               className="rounded-2xl border border-white/8 bg-ink-soft flex flex-col gap-0 overflow-hidden shadow-inset-top"
             >
               {/* Card header */}
-              <div className="px-7 pt-7 pb-5">
+              <div className="px-5 pt-5 pb-4 sm:px-7 sm:pt-7 sm:pb-5">
                 <div className="flex items-center justify-between">
                   <span className="label-mono text-accent">{l.tagLabel}</span>
                   <div className="text-right">
@@ -83,7 +83,7 @@ export function Levels() {
               </div>
 
               {/* Signals */}
-              <div className="px-7 py-5 border-t border-white/6 mt-auto">
+              <div className="px-5 py-4 sm:px-7 sm:py-5 border-t border-white/6 mt-auto">
                 <p className="label-mono text-white/35 mb-3">Ключові сигнали</p>
                 <ul className="space-y-3">
                   {l.signals.map((s) => (
@@ -104,7 +104,7 @@ export function Levels() {
               </div>
 
               {/* Score range footer */}
-              <div className="px-7 py-4 border-t border-white/6 flex items-center justify-between">
+              <div className="px-5 py-3.5 sm:px-7 sm:py-4 border-t border-white/6 flex items-center justify-between">
                 <span className="label-mono text-white/35">Очікуваний скор</span>
                 <span className="tabular font-mono text-sm text-accent font-semibold">
                   {l.scoreRange} / 5.0

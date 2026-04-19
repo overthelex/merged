@@ -42,15 +42,15 @@ export default async function InvitePage({
   const level = SENIORITY_LABEL[row.seniority] ?? row.seniority;
 
   return (
-    <main className="min-h-screen bg-paper text-ink py-12 px-6">
+    <main className="min-h-screen bg-paper text-ink py-8 sm:py-12 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         <div className="label-mono text-ink-muted mb-2">merged · assessment</div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight mb-2">
           Вас запрошено на калібровану задачу
         </h1>
         <p className="text-ink-muted mb-8">
           Рівень: <strong className="text-ink">{level}</strong> · Assignment{' '}
-          <code className="font-mono text-sm">{row.shortId}</code>
+          <code className="font-mono text-sm break-all">{row.shortId}</code>
         </p>
 
         {existing ? (
