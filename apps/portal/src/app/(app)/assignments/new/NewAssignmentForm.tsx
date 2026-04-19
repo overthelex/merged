@@ -307,6 +307,11 @@ const FORK_STEPS: ProgressStep[] = [
     durationMs: 15000,
   },
   {
+    label: 'Фінальна вичитка',
+    hint: 'Verifier перечитує ТЗ очима кандидата та оцінювача.',
+    durationMs: 10000,
+  },
+  {
     label: 'Налаштовуємо захист main-гілки',
     hint: 'Щоб кандидат не міг напряму мержити у main.',
     durationMs: 2500,

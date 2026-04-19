@@ -151,6 +151,7 @@ export async function createAssignment(
           assignmentId: row.id,
           taskId: composed.pipeline.spec.id,
           revisions: composed.pipeline.verdicts.length,
+          verifications: composed.pipeline.verifications.length,
           surfaces: composed.pipeline.surfaces.length,
         });
       }

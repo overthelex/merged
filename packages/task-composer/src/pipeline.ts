@@ -3,11 +3,13 @@ import { runCalibrator, type CalibratorConfig } from './calibrator';
 import { runComposer, type ComposerConfig } from './composer';
 import { scanRepo, type ScanOptions } from './repoScan';
 import { runScout, type ScoutConfig } from './scout';
+import { runVerifier, type VerifierConfig } from './verifier';
 import type {
   CalibratorVerdict,
   ComposerDraft,
   RepoMeta,
   Surface,
+  VerifierReport,
 } from './types';
 
 export interface ComposeTaskInputs {
@@ -22,8 +24,18 @@ export interface ComposeTaskInputs {
   scout?: ScoutConfig;
   composer?: ComposerConfig;
   calibrator?: CalibratorConfig;
+  verifier?: VerifierConfig;
   scan?: ScanOptions;
-  /** Max Composer↔Calibrator iterations. Default 2 (up to 3 Composer calls). */
+  /**
+   * Max Composer→Calibrator→Verifier iterations. Default 3. Each iteration
+   * runs Composer, Calibrator, and (if Calibrator passes) Verifier. A
+   * Calibrator rejection or a Verifier rejection both consume one iteration.
+   */
+  maxIterations?: number;
+  /**
+   * @deprecated Use `maxIterations` instead. Kept for backwards compatibility;
+   * maps to `maxIterations = maxRevisions + 1` when `maxIterations` is not set.
+   */
   maxRevisions?: number;
 }
 
@@ -32,14 +44,17 @@ export interface ComposeTaskResult {
   draft: ComposerDraft;
   surfaces: Surface[];
   meta: RepoMeta;
-  /** Every verdict collected, in order. Last one has `ok: true`. */
+  /** Calibrator verdicts, one per iteration that reached Calibrator. Last is ok. */
   verdicts: CalibratorVerdict[];
+  /** Verifier reports, one per iteration that passed Calibrator. Last is ok. */
+  verifications: VerifierReport[];
 }
 
 /**
- * End-to-end pipeline: scan repo → Scout (parallel) → Composer → Calibrator.
- * Composer redrafts on each Calibrator rejection, up to `maxRevisions`.
- * Throws if every revision is rejected.
+ * End-to-end pipeline: scan repo → Scout (parallel) → loop of
+ * Composer → Calibrator → Verifier. Verifier is only consulted when
+ * Calibrator approved the draft; either rejection feeds `revisionNotes`
+ * back into the next Composer call. Throws if every iteration is rejected.
  */
 export async function composeTask(inputs: ComposeTaskInputs): Promise<ComposeTaskResult> {
   const { files, meta } = await scanRepo(inputs.repoPath, inputs.scan);
@@ -58,11 +73,16 @@ export async function composeTask(inputs: ComposeTaskInputs): Promise<ComposeTas
     );
   }
 
+  const maxIterations = Math.max(
+    1,
+    inputs.maxIterations ??
+      (typeof inputs.maxRevisions === 'number' ? inputs.maxRevisions + 1 : 3),
+  );
   const verdicts: CalibratorVerdict[] = [];
-  const maxRevisions = Math.max(0, inputs.maxRevisions ?? 2);
+  const verifications: VerifierReport[] = [];
   let revisionNotes: string[] | undefined;
 
-  for (let round = 0; round <= maxRevisions; round++) {
+  for (let iter = 0; iter < maxIterations; iter++) {
     const draft = await runComposer(
       {
         surfaces: scoutReport.surfaces,
@@ -78,15 +98,40 @@ export async function composeTask(inputs: ComposeTaskInputs): Promise<ComposeTas
       inputs.calibrator,
     );
     verdicts.push(verdict);
-    if (verdict.ok && spec) {
-      return { spec, draft, surfaces: scoutReport.surfaces, meta, verdicts };
+
+    if (!verdict.ok || !spec) {
+      revisionNotes = [...verdict.schema_errors, ...verdict.coherence_notes];
+      continue;
     }
-    revisionNotes = [...verdict.schema_errors, ...verdict.coherence_notes];
+
+    const verification = await runVerifier(
+      { draft, spec, level: inputs.level, meta },
+      inputs.verifier,
+    );
+    verifications.push(verification);
+
+    if (verification.ok) {
+      return {
+        spec,
+        draft,
+        surfaces: scoutReport.surfaces,
+        meta,
+        verdicts,
+        verifications,
+      };
+    }
+    revisionNotes = verification.issues;
   }
 
-  const last = verdicts[verdicts.length - 1];
-  const tail = last
-    ? [...last.schema_errors, ...last.coherence_notes].slice(0, 5).join(' | ')
-    : 'no verdicts collected';
-  throw new Error(`calibrator rejected all ${verdicts.length} drafts · last notes: ${tail}`);
+  const lastVerification = verifications[verifications.length - 1];
+  const lastVerdict = verdicts[verdicts.length - 1];
+  const tailSource = lastVerification?.issues.length
+    ? lastVerification.issues
+    : lastVerdict
+      ? [...lastVerdict.schema_errors, ...lastVerdict.coherence_notes]
+      : [];
+  const tail = tailSource.slice(0, 5).join(' | ') || 'no notes collected';
+  throw new Error(
+    `pipeline failed after ${maxIterations} iterations · last notes: ${tail}`,
+  );
 }

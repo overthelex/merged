@@ -14,6 +14,9 @@ export type {
   CalibratorResult,
 } from './calibrator';
 
+export { runVerifier } from './verifier';
+export type { VerifierConfig, VerifierInputs } from './verifier';
+
 export { scanRepo, partitionFiles } from './repoScan';
 export type { ScanOptions, ScanResult } from './repoScan';
 
@@ -23,6 +26,8 @@ export {
   ComposerDraftSchema,
   CalibratorVerdictSchema,
   LlmCoherenceSchema,
+  LlmVerificationSchema,
+  VerifierReportSchema,
   RepoFileSchema,
   RepoMetaSchema,
   SURFACE_KIND,
@@ -34,6 +39,8 @@ export type {
   ComposerDraft,
   CalibratorVerdict,
   LlmCoherence,
+  LlmVerification,
+  VerifierReport,
   RepoFile,
   RepoMeta,
 } from './types';
