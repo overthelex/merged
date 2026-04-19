@@ -125,6 +125,12 @@ export const assignmentStatus = pgEnum('assignment_status', [
   'cancelled',
   'expired',
 ]);
+export const appealStatus = pgEnum('appeal_status', [
+  'none',
+  'requested',
+  'approved',
+  'rejected',
+]);
 
 export const companies = pgTable(
   'company',
@@ -207,6 +213,10 @@ export const submissions = pgTable(
     score: integer('score'),
     breakdown: jsonb('breakdown'),
     scoredAt: timestamp('scored_at', { withTimezone: true }),
+    appealToken: varchar('appeal_token', { length: 80 }).unique(),
+    appealStatus: appealStatus('appeal_status').notNull().default('none'),
+    appealReason: text('appeal_reason'),
+    appealRequestedAt: timestamp('appeal_requested_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
@@ -245,4 +255,5 @@ export type CompanyToken = typeof companyTokens.$inferSelect;
 export type NewCompanyToken = typeof companyTokens.$inferInsert;
 export type Seniority = (typeof seniority.enumValues)[number];
 export type AssignmentStatusValue = (typeof assignmentStatus.enumValues)[number];
+export type AppealStatusValue = (typeof appealStatus.enumValues)[number];
 export type UserRole = (typeof userRole.enumValues)[number];

@@ -7,3 +7,4 @@ export * from './templates/leadReceived';
 export * from './templates/candidateAccepted';
 export * from './templates/submissionReceived';
 export * from './templates/submissionScored';
+export * from './templates/appealSubmitted';

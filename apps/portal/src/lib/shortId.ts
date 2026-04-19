@@ -15,3 +15,7 @@ export function shortId(len = 10): string {
 export function inviteToken(): string {
   return randomBytes(24).toString('base64url');
 }
+
+export function appealToken(): string {
+  return randomBytes(24).toString('base64url');
+}

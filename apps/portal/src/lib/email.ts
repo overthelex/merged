@@ -11,6 +11,7 @@ import {
   renderCandidateAccepted,
   renderSubmissionReceived,
   renderSubmissionScored,
+  renderAppealSubmitted,
   renderLeadReceived,
   type SendResult,
 } from '@merged/email';
@@ -205,6 +206,10 @@ export async function sendSubmissionReceivedEmail(input: {
   await safeSend('submission_received', input.to, rendered);
 }
 
+// Caller is responsible for persisting `appealToken` onto the submission row
+// (see `appealToken()` in lib/shortId) before calling this — the token is what
+// authenticates the candidate on the /appeal/[token] page. Pass null to send
+// the scored email without an appeal CTA.
 export async function sendSubmissionScoredEmail(input: {
   to: string | string[];
   assignmentId: string;
@@ -216,6 +221,7 @@ export async function sendSubmissionScoredEmail(input: {
   sourceRepo: string;
   seniorityLabel: string;
   shortId: string;
+  appealToken: string | null;
 }): Promise<void> {
   const cfg = config();
   const portal = portalUrl();
@@ -223,7 +229,6 @@ export async function sendSubmissionScoredEmail(input: {
     brandUrl: cfg?.brandUrl ?? 'https://merged.com.ua',
     logoUrl:
       cfg?.logoUrl ?? 'https://portal.merged.com.ua/brand/logo-ink-128.png',
-    portalUrl: portal,
     assignmentUrl: `${portal}/assignments/${input.assignmentId}`,
     prUrl: input.prUrl,
     prNumber: input.prNumber,
@@ -233,8 +238,42 @@ export async function sendSubmissionScoredEmail(input: {
     sourceRepo: input.sourceRepo,
     seniorityLabel: input.seniorityLabel,
     shortId: input.shortId,
+    appealUrl: input.appealToken ? `${portal}/appeal/${input.appealToken}` : null,
   });
   await safeSend('submission_scored', input.to, rendered);
+}
+
+export async function sendAppealSubmittedEmail(input: {
+  to: string | string[];
+  assignmentId: string;
+  prUrl: string;
+  prNumber: number;
+  score: number;
+  reason: string;
+  githubUsername: string | null;
+  candidateEmail: string | null;
+  sourceRepo: string;
+  seniorityLabel: string;
+  shortId: string;
+}): Promise<void> {
+  const cfg = config();
+  const portal = portalUrl();
+  const rendered = renderAppealSubmitted({
+    brandUrl: cfg?.brandUrl ?? 'https://merged.com.ua',
+    logoUrl:
+      cfg?.logoUrl ?? 'https://portal.merged.com.ua/brand/logo-ink-128.png',
+    assignmentUrl: `${portal}/assignments/${input.assignmentId}`,
+    prUrl: input.prUrl,
+    prNumber: input.prNumber,
+    score: input.score,
+    reason: input.reason,
+    githubUsername: input.githubUsername,
+    candidateEmail: input.candidateEmail,
+    sourceRepo: input.sourceRepo,
+    seniorityLabel: input.seniorityLabel,
+    shortId: input.shortId,
+  });
+  await safeSend('appeal_submitted', input.to, rendered);
 }
 
 export async function sendLeadReceivedEmail(input: {
