@@ -1,0 +1,465 @@
+{
+  "metadata": {
+    "title": "merged — la pré-sélection technique sans entretien",
+    "titleTemplate": "{page} · merged",
+    "description": "Fini les entretiens Leetcode : un exercice calibré dans un vrai dépôt. Le candidat ouvre une pull request, nous l'évaluons automatiquement à la grille. L'IA est autorisée — les exercices sont conçus pour qu'elle soit nécessaire, mais jamais suffisante.",
+    "siteName": "merged",
+    "organizationName": "merged"
+  },
+  "hero": {
+    "navAriaLabel": "Navigation principale",
+    "logoAlt": "merged",
+    "badge": "merged · bêta fermée · 2026",
+    "titlePart1": "La pré-sélection technique — ",
+    "titlePart2": "sans entretien",
+    "titlePart3": ".",
+    "subtitle": "Fini Leetcode : un seul exercice calibré dans un vrai dépôt. Le candidat ouvre une pull request. Le système évalue tout automatiquement : tests, périmètre des changements, qualité des commits, réponses à la revue.",
+    "ctaPrimary": "Accéder au portail",
+    "ctaSecondary": "Voir comment ça marche",
+    "audienceNote": "pour les équipes RH",
+    "stats": {
+      "time": {
+        "value": "~2 min",
+        "label": "pour évaluer une PR"
+      },
+      "accuracy": {
+        "value": "87 %",
+        "label": "précision de la grille"
+      },
+      "seniorTime": {
+        "value": "0 h",
+        "label": "de temps Senior"
+      }
+    },
+    "nav": {
+      "problem": "Problème",
+      "howItWorks": "Fonctionnement",
+      "levels": "Niveaux",
+      "blog": "Blog",
+      "demo": "Démo"
+    },
+    "diffCard": {
+      "prLabel": "pull request · #42",
+      "prStatus": "open",
+      "rows": {
+        "tests": {
+          "label": "CI au vert",
+          "value": "87/87"
+        },
+        "diff": {
+          "label": "Périmètre du diff",
+          "value": "3 fichiers, +24 −4"
+        },
+        "llm": {
+          "label": "Grille (LLM juge)",
+          "value": "4.6 / 5.0"
+        }
+      },
+      "passedAriaLabel": "passed",
+      "footerMeta": "senior · legacy-invoice",
+      "footerStatus": "PASS"
+    }
+  },
+  "problem": {
+    "eyebrow": "Problème",
+    "title": "Les entretiens techniques sont cassés. Tout le monde le sait, personne ne change rien.",
+    "body1Prefix": "",
+    "body1LeetcodeTerm": "Leetcode",
+    "body1LeetcodeSuffix": " mesure la préparation à Leetcode. ",
+    "body1SystemDesignTerm": "System design",
+    "body1SystemDesignSuffix": " — l'art de dessiner des boîtes. ",
+    "body1BehavioralTerm": "Behavioral",
+    "body1BehavioralSuffix": " — celui de raconter des histoires STAR. Aucun ne montre comment une personne travaille réellement au quotidien.",
+    "body2": "Et en 2026, même cette illusion de signal s'est effondrée : Copilot et Cursor bouclent l'exercice classique en 10 minutes. Pendant ce temps, vos Seniors enchaînent des dizaines d'appels de pré-sélection par mois et voient leur temps partir en fumée.",
+    "tableHeaders": {
+      "method": "Méthode",
+      "measures": "Ce qu'elle mesure",
+      "signal": "Qualité du signal",
+      "cost": "Coût"
+    },
+    "rows": [
+      {
+        "method": "Pré-sélection Leetcode",
+        "measures": "La préparation à Leetcode",
+        "signal": "Faible",
+        "cost": "2–4 h / candidat"
+      },
+      {
+        "method": "Entretien System design",
+        "measures": "L'art de dessiner des diagrammes",
+        "signal": "Moyen",
+        "cost": "1–2 h / candidat"
+      },
+      {
+        "method": "Behavioral (STAR)",
+        "measures": "L'art du récit",
+        "signal": "Faible",
+        "cost": "1 h / candidat"
+      },
+      {
+        "method": "Pré-sélection PR merged",
+        "measures": "Le vrai travail dans un dépôt",
+        "signal": "Élevé",
+        "cost": "~2 min, en automatique"
+      }
+    ],
+    "signalLevels": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Élevé"
+    },
+    "footnote": "* Coût estimé pour la pré-sélection d'un candidat, temps d'ingénieur inclus"
+  },
+  "howItWorks": {
+    "eyebrow": "Comment ça marche",
+    "title": "Quatre étapes. Zéro heure d'ingénieur.",
+    "steps": [
+      {
+        "n": "01",
+        "title": "Le recruteur attribue un exercice",
+        "body": "Depuis le catalogue, selon le niveau du candidat (Junior / Middle / Senior) et votre stack. Sans appel, sans whiteboard. 30 secondes dans le portail.",
+        "meta": "30 s",
+        "metaLabel": "pour configurer"
+      },
+      {
+        "n": "02",
+        "title": "Le candidat ouvre une pull request",
+        "body": "Il récupère un dépôt privé avec un contexte réel. L'IA est autorisée — les exercices sont conçus pour qu'elle soit nécessaire, mais jamais suffisante.",
+        "meta": "45–120 min",
+        "metaLabel": "temps candidat"
+      },
+      {
+        "n": "03",
+        "title": "Le système évalue automatiquement",
+        "body": "Tests CI, périmètre du diff, qualité des commits, réponses à la revue automatique. Un LLM juge relit l'intégralité de la PR selon une grille structurée.",
+        "meta": "~2 min",
+        "metaLabel": "après soumission"
+      },
+      {
+        "n": "04",
+        "title": "Le recruteur reçoit un rapport classé",
+        "body": "Scores par critère, lien vers la PR, points forts et points faibles. Il ne reste qu'un entretien final avec l'équipe, centré sur le fit culturel.",
+        "meta": "immédiat",
+        "metaLabel": "rapport disponible"
+      }
+    ]
+  },
+  "levels": {
+    "eyebrow": "Niveaux",
+    "title": "L'exercice se calibre sur le niveau visé.",
+    "subtitle": "Notre vrai moat, c'est la conception des exercices. Nous ne luttons pas contre l'IA : nous faisons simplement en sorte que, sans compréhension du système, elle se réduise à une machine à écrire. Chaque exercice est calibré à la main, sur de vrais candidats.",
+    "signalsHeading": "Signaux clés",
+    "scoreLabel": "Score attendu",
+    "scoreSuffix": " / 5.0",
+    "noteLabel": "NOTE",
+    "note": "L'IA est autorisée, et même attendue. Une solution Claude « à l'aveugle » plafonne à 30–40 / 100 : les tests cassent sur les edge cases, la description de PR est vide, les commits se résument à un gros blob. La grille mesure la compréhension du système, pas le fait d'avoir écrit du code.",
+    "levels": [
+      {
+        "tagLabel": "Junior",
+        "hook": "Ajoutez une fonctionnalité dans un dépôt propre",
+        "desc": "Un petit projet avec ses propres conventions. Il faut lire le README, ne rien casser au passage, écrire un test. Cursor y arrive — nous écartons ceux qui n'y arrivent pas, même avec lui.",
+        "duration": "45 min",
+        "scoreRange": "2.0–3.5",
+        "signals": [
+          {
+            "label": "Lit les consignes",
+            "weight": "30"
+          },
+          {
+            "label": "Ne casse pas l'existant",
+            "weight": "40"
+          },
+          {
+            "label": "Écrit un test",
+            "weight": "30"
+          }
+        ]
+      },
+      {
+        "tagLabel": "Middle",
+        "hook": "Reproduisez un bug et corrigez-le",
+        "desc": "Un dépôt plus gros, un énoncé volontairement flou : « les utilisateurs signalent que Y se comporte bizarrement dans le cas Z ». L'IA ne sait pas quoi corriger — il faut remonter à la cause.",
+        "duration": "90 min",
+        "scoreRange": "3.0–4.5",
+        "signals": [
+          {
+            "label": "Décomposition",
+            "weight": "35"
+          },
+          {
+            "label": "Choix du niveau de correction",
+            "weight": "35"
+          },
+          {
+            "label": "Justification dans la PR",
+            "weight": "30"
+          }
+        ]
+      },
+      {
+        "tagLabel": "Senior",
+        "hook": "Du legacy avec dette architecturale",
+        "desc": "L'exercice : « livrez la fonctionnalité de manière à pouvoir l'étendre à W dans six mois, sans tout réécrire ». Design doc obligatoire dans la PR — l'IA écrira le code, mais ne prendra pas les décisions à la place de l'humain.",
+        "duration": "120 min",
+        "scoreRange": "3.5–5.0",
+        "signals": [
+          {
+            "label": "Trade-offs",
+            "weight": "40"
+          },
+          {
+            "label": "Extensibilité",
+            "weight": "35"
+          },
+          {
+            "label": "Qualité du rationale",
+            "weight": "25"
+          }
+        ]
+      }
+    ]
+  },
+  "signals": {
+    "eyebrow": "Ce que nous mesurons vraiment",
+    "title": "Un « CI vert », c'est seulement 20 % du signal.",
+    "subtitle": "Les 80 % restants, c'est ce qu'un LLM juge, armé d'une grille structurée, fait mieux qu'un intervieweur humain : il lit toute la PR, la description, l'historique des commits, les réponses aux commentaires. Sans fatigue, sans biais.",
+    "summary": {
+      "autoLabel": "CI automatique",
+      "llmLabel": "LLM juge"
+    },
+    "rubric": {
+      "heading": "Poids de la grille",
+      "totalLabel": "100 % au total",
+      "autoSectionLabel": "CI automatique",
+      "llmSectionLabel": "LLM juge",
+      "footnote": "* Les poids se règlent au niveau du template d'exercice"
+    },
+    "items": {
+      "auto": [
+        {
+          "label": "Tests au vert",
+          "note": "Déterministe, sans biais d'échantillonnage"
+        },
+        {
+          "label": "Périmètre et taille du diff",
+          "note": "Changements minimaux, sans retouches superflues"
+        },
+        {
+          "label": "Qualité des commits",
+          "note": "Atomic commits, Conventional Commits"
+        }
+      ],
+      "llm": [
+        {
+          "label": "Rationale dans la description de PR",
+          "note": "Le « pourquoi » est-il explicité, pas seulement le « quoi » ?"
+        },
+        {
+          "label": "Décomposition de l'exercice",
+          "note": "Cheminement de pensée, étapes de résolution"
+        },
+        {
+          "label": "Trade-offs et architecture",
+          "note": "Alternatives envisagées, choix assumé"
+        }
+      ]
+    }
+  },
+  "forWhom": {
+    "eyebrow": "Pour qui",
+    "title": "Le développeur est l'utilisateur. Le Hiring Manager est le payeur.",
+    "subtitle": "Chaque rôle y trouve son compte : le développeur, une évaluation asynchrone et honnête, sans live-coding ; le manager, du temps rendu à son équipe et une short-list finale de meilleure qualité.",
+    "developer": {
+      "role": "Développeurs",
+      "metrics": [
+        {
+          "value": "0",
+          "label": "live-coding caméra allumée"
+        },
+        {
+          "value": "~2 min",
+          "label": "de la soumission au rapport"
+        }
+      ],
+      "lines": [
+        "Vous ne codez pas sous pression en 45 minutes : vous prenez l'exercice et avancez à votre rythme.",
+        "L'assistant IA n'est pas interdit, il est attendu. Votre Cursor / Claude / Copilot habituel reste branché.",
+        "Vous voyez la grille avant de commencer : ce qui est évalué, les signaux qui comptent. Aucun « vibe check »."
+      ]
+    },
+    "manager": {
+      "role": "Responsables ingénierie",
+      "metrics": [
+        {
+          "value": "40+ h",
+          "label": "rendues à l'équipe chaque mois"
+        },
+        {
+          "value": "1",
+          "label": "réunion au lieu de 4 à 6 rounds"
+        }
+      ],
+      "lines": [
+        "Votre équipe ne brûle plus 40 heures par mois en appels de pré-sélection.",
+        "La décision, en réunion finale, porte sur la personne — plus sur ses bases techniques.",
+        "Vous voyez comment le candidat réfléchit et justifie ses choix, pas seulement ce qu'il a livré."
+      ]
+    }
+  },
+  "objections": {
+    "eyebrow": "Les objections, franchement",
+    "title": "Cinq choses que vous êtes en train de vous dire.",
+    "items": [
+      {
+        "tag": "Résistance à l'IA",
+        "q": "Et si le candidat se contente de refiler l'exercice à Claude ?",
+        "a": "Qu'il le fasse. Les exercices sont conçus pour qu'une solution IA « à l'aveugle » plafonne à 30–40 / 100 : les tests cassent sur les edge cases, la description de PR est vide, les commits se résument à un seul gros blob, les réponses à la revue automatique restent génériques. Nous ne mesurons pas « il a écrit du code », mais « il a compris le système »."
+      },
+      {
+        "tag": "Sécurité",
+        "q": "Vos exercices vont fuiter sur internet et dans les données d'entraînement des modèles.",
+        "a": "Chaque exercice est paramétré : un seul template génère des dizaines de variantes, avec des seeds, des noms et des accents d'exigences différents. Une solution publique pour une version précise ne passera pas les autres. À cela s'ajoute une option d'exercices privés, sur votre propre code, pour le plan enterprise."
+      },
+      {
+        "tag": "Format",
+        "q": "Un Senior ne fera jamais un devoir à la maison de trois heures.",
+        "a": "Nous sommes d'accord. Pour les Seniors, un autre format : session en binôme de 45 minutes. Il partage son écran, résout avec l'IA, le système capte la télémétrie (temps de réflexion, recherches, réécritures). Ça tient dans un calendrier, et ça mesure bien plus qu'un entretien classique."
+      },
+      {
+        "tag": "Processus",
+        "q": "Ça ne remplace pas l'entretien final avec l'équipe ?",
+        "a": "Nous ne supprimons pas l'entretien. Nous supprimons l'étape où vous engloutissez 40 heures d'ingénieur à filtrer des personnes qui, tout simplement, ne savent pas programmer. Le fit culturel et la question « ai-je envie de travailler 5 ans avec cette personne ? » restent, eux, en rendez-vous humain."
+      },
+      {
+        "tag": "Concurrents",
+        "q": "En quoi c'est mieux que HackerRank / CodeSignal / Codility ?",
+        "a": "Eux mesurent du Leetcode, en 2026. Nous mesurons du vrai travail : une PR dans un vrai dépôt, avec un vrai contexte, évaluée à la grille par un LLM juge. Ce n'est plus la même catégorie de produit — c'est du work-sample assessment pour l'ère de l'IA."
+      }
+    ]
+  },
+  "privacy": {
+    "metaTitle": "Confidentialité",
+    "metaDescription": "merged collecte le minimum de données nécessaires à la pré-sélection. Serveur dans l'UE (AWS eu-central-1). Demande de suppression des données : request@merged.com.ua.",
+    "heading": "Politique de confidentialité",
+    "body1": "merged collecte le strict minimum de données nécessaires au fonctionnement du service : adresse e-mail, nom, société, et, pendant la réalisation de l'exercice, les métadonnées de la pull request du candidat. Nous ne transmettons aucune donnée à caractère personnel à des tiers. Le serveur est hébergé dans l'Union européenne (Francfort, AWS eu-central-1).",
+    "deletionRequestPrefix": "Demande de suppression des données : ",
+    "deletionRequestEmail": "request@merged.com.ua"
+  },
+  "terms": {
+    "metaTitle": "Conditions",
+    "metaDescription": "Conditions d'utilisation de merged. Bêta fermée, service fourni « en l'état », aucun paiement perçu. Le client reste responsable du recueil du consentement du candidat au traitement des données.",
+    "heading": "Conditions d'utilisation",
+    "body1": "Bêta fermée. Le service est fourni « en l'état ». Aucun paiement n'est perçu pendant la période de bêta. Le client reste responsable de la conformité juridique du processus de recrutement de son côté (recueil du consentement du candidat au traitement des données à caractère personnel, absence de discrimination, etc.)."
+  },
+  "blogIndex": {
+    "metaTitle": "Blog · la pré-sélection des ingénieurs à l'ère de l'IA",
+    "metaDescription": "Essais merged sur le recrutement à l'ère de l'IA : work-sample assessment, LLM juges, grilles d'évaluation, retours de bêta fermée.",
+    "ogTitle": "merged — blog",
+    "ogDescription": "Pratique et recherche sur la pré-sélection technique, les grilles d'évaluation et le travail avec l'IA.",
+    "headerCta": "Demander une démo",
+    "eyebrow": "Blog merged",
+    "titlePart1": "Recruter des ingénieurs — ",
+    "titlePart2": "sans les rituels",
+    "titlePart3": ".",
+    "subtitle": "Essais sur le work-sample assessment, les grilles pour LLM juge, le calibrage des exercices et la pratique, en direct, de la bêta fermée merged.",
+    "readCta": "Lire"
+  },
+  "blogArticle": {
+    "notFoundTitle": "Article introuvable",
+    "backToIndex": "Tous les articles",
+    "ctaEyebrow": "Essayer merged",
+    "ctaTitle": "La pré-sélection technique sans entretien",
+    "ctaBody": "Exercice calibré, grille automatique, rapport en ~2 minutes. Bêta fermée, T2 2026."
+  },
+  "articleShare": {
+    "label": "Partager",
+    "linkedin": "LinkedIn",
+    "x": "X",
+    "telegram": "Telegram",
+    "copyLink": "Copier le lien",
+    "copied": "Copié"
+  },
+  "blogTeaser": {
+    "eyebrow": "Blog",
+    "title": "Essais sur le recrutement à l'ère de l'IA.",
+    "subtitle": "Pratique de la pré-sélection, grilles de LLM juge, rapports ouverts de la bêta fermée, guides pour recruteurs et candidats — sans marketing et sans « book a demo ».",
+    "allArticles": "Tous les articles",
+    "readCta": "Lire"
+  },
+  "footer": {
+    "tagline": "La pré-sélection technique sans entretien — work-sample assessment pour l'ère de l'IA.",
+    "contactHeading": "Contact",
+    "contactEmail": "request@merged.com.ua",
+    "blogLink": "Blog",
+    "documentsHeading": "Documents",
+    "privacyLink": "Confidentialité",
+    "termsLink": "Conditions d'utilisation",
+    "copyright": "© 2026 merged · Ukraine",
+    "betaNote": "Bêta fermée · TID 2026",
+    "logoAlt": "merged"
+  },
+  "siteHeader": {
+    "navAriaLabel": "Navigation principale",
+    "logoAlt": "merged",
+    "nav": {
+      "problem": "Problème",
+      "howItWorks": "Fonctionnement",
+      "blog": "Blog",
+      "demo": "Démo"
+    }
+  },
+  "leadForm": {
+    "eyebrow": "Démo",
+    "title": "Voyons ce que ça donne sur votre stack.",
+    "subtitle": "15 minutes. Vous nous dites qui vous recrutez. Nous vous montrons à quoi ressemblerait la pré-sélection avec merged, à la place des appels. Des exemples d'exercices sur votre stack atterrissent dans votre boîte mail le jour même.",
+    "commitments": [
+      "Bêta fermée, marché ukrainien",
+      "Sans acompte, sans contrat",
+      "Réponse sous 24 heures"
+    ],
+    "alternative": {
+      "label": "Alternative",
+      "prefix": "Pas envie de remplir un formulaire ? Écrivez-nous directement : ",
+      "email": "request@merged.com.ua"
+    },
+    "fields": {
+      "name": {
+        "label": "Prénom",
+        "placeholder": "Hélène",
+        "hint": "Comment vous appeler"
+      },
+      "company": {
+        "label": "Société",
+        "placeholder": "Tech Studio",
+        "hint": "Nom de votre organisation"
+      },
+      "email": {
+        "label": "E-mail professionnel",
+        "placeholder": "helene@techstudio.fr",
+        "hint": "Nous vous répondrons à cette adresse"
+      },
+      "role": {
+        "label": "Votre fonction",
+        "placeholder": "Head of Engineering · Recruiter · CTO",
+        "hint": "Facultatif"
+      },
+      "note": {
+        "label": "Contexte",
+        "placeholder": "Qui vous recrutez, combien par mois, quelle stack — tout ce qui peut nous aider",
+        "hint": "Nous préparerons une démo vraiment pertinente"
+      }
+    },
+    "requiredAriaLabel": "champ obligatoire",
+    "submit": "Demander une démo",
+    "sending": "Envoi en cours…",
+    "errorPrefix": "Échec de l'envoi",
+    "errorDetailPrefix": " : ",
+    "errorSuffix": ". Écrivez à ",
+    "errorFallback": "Erreur",
+    "privacyNote": "Nous ne transmettons pas vos données à des tiers et ne vous enverrons pas de spam. Désinscription en un clic, à tout moment.",
+    "success": {
+      "title": "Demande bien reçue",
+      "body": "Nous revenons vers vous sous 24 heures avec une proposition de créneau pour la démo."
+    }
+  }
+}

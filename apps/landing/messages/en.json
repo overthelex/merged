@@ -1,0 +1,465 @@
+{
+  "metadata": {
+    "title": "merged — technical screening without interviews",
+    "titleTemplate": "{page} · merged",
+    "description": "Instead of a Leetcode interview — one calibrated task in a real repo. The candidate opens a PR, we score it automatically against a rubric. AI is allowed — tasks are designed so it's necessary but not sufficient.",
+    "siteName": "merged",
+    "organizationName": "merged"
+  },
+  "hero": {
+    "navAriaLabel": "Main navigation",
+    "logoAlt": "merged",
+    "badge": "merged · closed beta · 2026",
+    "titlePart1": "Technical screening — ",
+    "titlePart2": "without interviews",
+    "titlePart3": ".",
+    "subtitle": "Instead of Leetcode — one calibrated task in a real repo. The candidate opens a pull request. The system scores it automatically: tests, diff shape, commit quality, responses to review.",
+    "ctaPrimary": "Enter portal",
+    "ctaSecondary": "How it works",
+    "audienceNote": "for HR managers",
+    "stats": {
+      "time": {
+        "value": "~2 min",
+        "label": "PR scoring time"
+      },
+      "accuracy": {
+        "value": "87%",
+        "label": "rubric accuracy"
+      },
+      "seniorTime": {
+        "value": "0 hrs",
+        "label": "of senior time"
+      }
+    },
+    "nav": {
+      "problem": "Problem",
+      "howItWorks": "How it works",
+      "levels": "Levels",
+      "blog": "Blog",
+      "demo": "Demo"
+    },
+    "diffCard": {
+      "prLabel": "pull request · #42",
+      "prStatus": "open",
+      "rows": {
+        "tests": {
+          "label": "CI passed",
+          "value": "87/87"
+        },
+        "diff": {
+          "label": "Diff focus",
+          "value": "3 files, +24 −4"
+        },
+        "llm": {
+          "label": "Rubric (LLM judge)",
+          "value": "4.6 / 5.0"
+        }
+      },
+      "passedAriaLabel": "passed",
+      "footerMeta": "senior · legacy-invoice",
+      "footerStatus": "PASS"
+    }
+  },
+  "problem": {
+    "eyebrow": "Problem",
+    "title": "Technical interviews are broken. Everyone knows it, and everyone keeps doing them.",
+    "body1Prefix": "",
+    "body1LeetcodeTerm": "Leetcode",
+    "body1LeetcodeSuffix": " measures Leetcode prep. ",
+    "body1SystemDesignTerm": "System design",
+    "body1SystemDesignSuffix": " — the skill of drawing boxes. ",
+    "body1BehavioralTerm": "Behavioral",
+    "body1BehavioralSuffix": " — the skill of telling STAR stories. None of them show how a person actually works day to day.",
+    "body2": "And in 2026 even that illusion of signal is gone: Copilot and Cursor close a typical task in 10 minutes. Your seniors run dozens of screening calls a month and dread how much time this stage burns.",
+    "tableHeaders": {
+      "method": "Method",
+      "measures": "What it measures",
+      "signal": "Signal quality",
+      "cost": "Cost"
+    },
+    "rows": [
+      {
+        "method": "Leetcode screen",
+        "measures": "Leetcode prep",
+        "signal": "Low",
+        "cost": "2–4 hrs / candidate"
+      },
+      {
+        "method": "System design interview",
+        "measures": "Diagram drawing",
+        "signal": "Medium",
+        "cost": "1–2 hrs / candidate"
+      },
+      {
+        "method": "Behavioral (STAR)",
+        "measures": "Storytelling skill",
+        "signal": "Low",
+        "cost": "1 hr / candidate"
+      },
+      {
+        "method": "merged PR screen",
+        "measures": "Real work in a repo",
+        "signal": "High",
+        "cost": "~2 min, automatic"
+      }
+    ],
+    "signalLevels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "footnote": "* Cost estimate — screening one candidate, including engineer time"
+  },
+  "howItWorks": {
+    "eyebrow": "How it works",
+    "title": "Four steps. Zero hours of engineering time.",
+    "steps": [
+      {
+        "n": "01",
+        "title": "Recruiter picks a task",
+        "body": "From the bank — matched to the candidate's level (Junior / Middle / Senior) and stack. No call, no whiteboard. 30 seconds in the panel.",
+        "meta": "30 sec",
+        "metaLabel": "to set up"
+      },
+      {
+        "n": "02",
+        "title": "Candidate opens a pull request",
+        "body": "Gets a private repo with real context. AI is allowed — tasks are designed so it's necessary but not sufficient.",
+        "meta": "45–120 min",
+        "metaLabel": "candidate time"
+      },
+      {
+        "n": "03",
+        "title": "System scores it automatically",
+        "body": "CI tests, diff focus, commit quality, responses to auto-review. An LLM judge reads the entire PR against a structured rubric.",
+        "meta": "~2 min",
+        "metaLabel": "after submit"
+      },
+      {
+        "n": "04",
+        "title": "Recruiter sees a ranked report",
+        "body": "Rubric scores, link to the PR, strengths and weaknesses. After that — just a final interview with the team for culture fit.",
+        "meta": "instantly",
+        "metaLabel": "report ready"
+      }
+    ]
+  },
+  "levels": {
+    "eyebrow": "Levels",
+    "title": "The task is calibrated to the level.",
+    "subtitle": "The product's moat is task design. We don't fight AI — we design tasks so that without understanding the system, AI is just a typewriter. Every task is hand-calibrated on live candidates.",
+    "signalsHeading": "Key signals",
+    "scoreLabel": "Expected score",
+    "scoreSuffix": " / 5.0",
+    "noteLabel": "NOTE",
+    "note": "AI is allowed and expected. A \"blind\" Claude solution scores 30–40/100: tests fail on edge cases, the PR description is empty, commits are one big blob. The rubric measures understanding of the system, not the fact that code got written.",
+    "levels": [
+      {
+        "tagLabel": "Junior",
+        "hook": "Add a feature to a clean repo",
+        "desc": "A small project with its own conventions. You have to read the README, avoid breaking anything else, and write a test. Cursor can handle this — we're filtering out people who can't.",
+        "duration": "45 min",
+        "scoreRange": "2.0–3.5",
+        "signals": [
+          {
+            "label": "Reads instructions",
+            "weight": "30"
+          },
+          {
+            "label": "Doesn't break existing code",
+            "weight": "40"
+          },
+          {
+            "label": "Writes a test",
+            "weight": "30"
+          }
+        ]
+      },
+      {
+        "tagLabel": "Middle",
+        "hook": "Reproduce a bug and fix it",
+        "desc": "A larger repo, vaguely phrased task: \"users complain that Y behaves oddly in case Z.\" AI doesn't know what to fix — you have to localize the root cause.",
+        "duration": "90 min",
+        "scoreRange": "3.0–4.5",
+        "signals": [
+          {
+            "label": "Decomposition",
+            "weight": "35"
+          },
+          {
+            "label": "Choice of fix layer",
+            "weight": "35"
+          },
+          {
+            "label": "Rationale in PR",
+            "weight": "30"
+          }
+        ]
+      },
+      {
+        "tagLabel": "Senior",
+        "hook": "Legacy with architectural debt",
+        "desc": "Task: \"ship this feature so that in six months it can be extended to W without a rewrite.\" A design doc in the PR is required — AI will write the code, but it won't make the decisions for you.",
+        "duration": "120 min",
+        "scoreRange": "3.5–5.0",
+        "signals": [
+          {
+            "label": "Trade-offs",
+            "weight": "40"
+          },
+          {
+            "label": "Extensibility",
+            "weight": "35"
+          },
+          {
+            "label": "Rationale quality",
+            "weight": "25"
+          }
+        ]
+      }
+    ]
+  },
+  "signals": {
+    "eyebrow": "What we actually measure",
+    "title": "\"Green CI\" is only 20% of the signal.",
+    "subtitle": "The other 80% is what an LLM judge does better than a human interviewer when it has a structured rubric: reads the whole PR, the description, the commit history, and the responses to comments. No fatigue, no bias.",
+    "summary": {
+      "autoLabel": "Automated CI",
+      "llmLabel": "LLM judge"
+    },
+    "rubric": {
+      "heading": "Rubric weights",
+      "totalLabel": "100% total",
+      "autoSectionLabel": "Automated CI",
+      "llmSectionLabel": "LLM judge",
+      "footnote": "* Weights are configurable at the task template level"
+    },
+    "items": {
+      "auto": [
+        {
+          "label": "Tests pass",
+          "note": "Deterministic, no sampling error"
+        },
+        {
+          "label": "Diff focus and size",
+          "note": "Minimal changes, no unrelated edits"
+        },
+        {
+          "label": "Commit quality",
+          "note": "Atomic commits, Conventional Commits"
+        }
+      ],
+      "llm": [
+        {
+          "label": "Rationale in the PR description",
+          "note": "Whether the \"why\" is explained, not just the \"what\""
+        },
+        {
+          "label": "Task decomposition",
+          "note": "Train of thought, solution steps"
+        },
+        {
+          "label": "Trade-offs and architecture",
+          "note": "Alternatives considered, choice justified"
+        }
+      ]
+    }
+  },
+  "forWhom": {
+    "eyebrow": "Who it's for",
+    "title": "The developer is the user. The hiring manager is the buyer.",
+    "subtitle": "Each role gets what matters: developers get a fair async evaluation without live coding; managers get their team's time back and a sharper final round.",
+    "developer": {
+      "role": "Developers",
+      "metrics": [
+        {
+          "value": "0",
+          "label": "live coding on camera"
+        },
+        {
+          "value": "~2 min",
+          "label": "from submit to report"
+        }
+      ],
+      "lines": [
+        "You're not coding under stress for 45 minutes — you take the task and work at your own pace.",
+        "AI assistants aren't banned — they're expected. Your usual Cursor / Claude / Copilot setup just works.",
+        "You see the rubric up front: what's being scored, which signals matter. No vibe check."
+      ]
+    },
+    "manager": {
+      "role": "Engineering leaders",
+      "metrics": [
+        {
+          "value": "40+ hrs",
+          "label": "returned to the team each month"
+        },
+        {
+          "value": "1",
+          "label": "meeting instead of 4–6 rounds"
+        }
+      ],
+      "lines": [
+        "Your team doesn't burn 40 hours a month on screening calls.",
+        "The final meeting is about the person, not technical basics.",
+        "You see how the candidate thinks and justifies decisions — not just what they wrote."
+      ]
+    }
+  },
+  "objections": {
+    "eyebrow": "Honest objections",
+    "title": "Five things you're thinking right now.",
+    "items": [
+      {
+        "tag": "AI-resistance",
+        "q": "What if the candidate just hands the task to Claude?",
+        "a": "Let them. Tasks are designed so a \"blind\" AI solution scores 30–40 out of 100: tests fail on edge cases, the PR description is empty, commits are one big blob, responses to auto-review are generic. We don't measure \"wrote code\" — we measure \"understood the system.\""
+      },
+      {
+        "tag": "Security",
+        "q": "Tasks will leak onto the internet and into model training data.",
+        "a": "Every task is parameterized: one template yields dozens of variants with different seeds, names, and emphases in the requirements. A public solution to one specific version won't pass another. Plus — an option for private tasks on your own code on the enterprise plan."
+      },
+      {
+        "tag": "Format",
+        "q": "A senior won't do a three-hour take-home.",
+        "a": "Agreed. For seniors — a 45-minute paired session: the candidate shares their screen, solves alongside AI, and the system records telemetry (how long they thought, what they searched, how much they rewrote). It fits on a calendar and measures more than a classic interview."
+      },
+      {
+        "tag": "Process",
+        "q": "This doesn't replace the final interview with the team, does it?",
+        "a": "We're not removing the interview. We're removing the stage where you burn 40 engineering hours filtering out people who simply can't code. Culture fit and \"do I want to work with them for five years\" stays a live conversation."
+      },
+      {
+        "tag": "Competitors",
+        "q": "How is this better than HackerRank / CodeSignal / Codility?",
+        "a": "They measure Leetcode — in 2026. We measure real work: a PR into a real repo with real context, scored by an LLM judge against a rubric. A different product category — work-sample assessment for the AI era."
+      }
+    ]
+  },
+  "privacy": {
+    "metaTitle": "Privacy",
+    "metaDescription": "merged collects the minimum data required for screening. Servers are in the EU (AWS eu-central-1). Data deletion requests — request@merged.com.ua.",
+    "heading": "Privacy Policy",
+    "body1": "merged collects the minimum data required to run the service: email, name, company, and — while a candidate is completing a task — metadata from the candidate's PR. We do not share personal data with third parties. Servers are in the EU (Frankfurt, AWS eu-central-1).",
+    "deletionRequestPrefix": "Data deletion requests — ",
+    "deletionRequestEmail": "request@merged.com.ua"
+  },
+  "terms": {
+    "metaTitle": "Terms",
+    "metaDescription": "merged terms of use. Closed beta, service provided \"as is,\" no fees charged. The customer is responsible for obtaining candidate consent to data processing.",
+    "heading": "Terms of Use",
+    "body1": "Closed beta. The service is provided \"as is.\" No fees are charged during the beta period. The customer is responsible for the legal correctness of the hiring process on their side (candidate consent to data processing, absence of discrimination, and so on)."
+  },
+  "blogIndex": {
+    "metaTitle": "Blog · on engineering screening in the AI era",
+    "metaDescription": "merged essays on hiring in the AI era: work-sample assessment, LLM judges, rubrics, notes from the closed beta.",
+    "ogTitle": "merged — blog",
+    "ogDescription": "Practice and research on technical screening, scoring rubrics, and working with AI.",
+    "headerCta": "Request demo",
+    "eyebrow": "merged blog",
+    "titlePart1": "Engineering hiring — ",
+    "titlePart2": "without the rituals",
+    "titlePart3": ".",
+    "subtitle": "Essays on work-sample assessment, rubrics for LLM judges, task calibration, and notes from the merged closed beta.",
+    "readCta": "Read"
+  },
+  "blogArticle": {
+    "notFoundTitle": "Article not found",
+    "backToIndex": "All articles",
+    "ctaEyebrow": "Try merged",
+    "ctaTitle": "Technical screening without interviews",
+    "ctaBody": "Calibrated task, automated rubric, report in ~2 min. Closed beta, Q2 2026."
+  },
+  "articleShare": {
+    "label": "Share",
+    "linkedin": "LinkedIn",
+    "x": "X",
+    "telegram": "Telegram",
+    "copyLink": "Copy link",
+    "copied": "Copied"
+  },
+  "blogTeaser": {
+    "eyebrow": "Blog",
+    "title": "Essays on hiring in the AI era.",
+    "subtitle": "Screening practice, LLM-judge rubrics, open reports from the closed beta, guides for recruiters and candidates — no marketing, no \"book a demo.\"",
+    "allArticles": "All articles",
+    "readCta": "Read"
+  },
+  "footer": {
+    "tagline": "Technical screening without interviews — work-sample assessment for the AI era.",
+    "contactHeading": "Contact",
+    "contactEmail": "request@merged.com.ua",
+    "blogLink": "Blog",
+    "documentsHeading": "Documents",
+    "privacyLink": "Privacy",
+    "termsLink": "Terms of Use",
+    "copyright": "© 2026 merged · Ukraine",
+    "betaNote": "Closed beta · TID 2026",
+    "logoAlt": "merged"
+  },
+  "siteHeader": {
+    "navAriaLabel": "Main navigation",
+    "logoAlt": "merged",
+    "nav": {
+      "problem": "Problem",
+      "howItWorks": "How it works",
+      "blog": "Blog",
+      "demo": "Demo"
+    }
+  },
+  "leadForm": {
+    "eyebrow": "Demo",
+    "title": "We'll show it on your stack.",
+    "subtitle": "15 minutes. You tell us who you're hiring. We'll show what screening in merged would look like instead of calls. Sample tasks for your stack — in your inbox the same day.",
+    "commitments": [
+      "Closed beta, Ukraine market",
+      "No prepayment, no contract",
+      "Response within 24 hours"
+    ],
+    "alternative": {
+      "label": "Alternative",
+      "prefix": "Don't want to fill out a form? Email us directly: ",
+      "email": "request@merged.com.ua"
+    },
+    "fields": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Olena",
+        "hint": "What to call you"
+      },
+      "company": {
+        "label": "Company",
+        "placeholder": "Tech Studio",
+        "hint": "Organization name"
+      },
+      "email": {
+        "label": "Work email",
+        "placeholder": "olena@techstudio.ua",
+        "hint": "We'll reply to this address"
+      },
+      "role": {
+        "label": "Your role",
+        "placeholder": "Head of Engineering · Recruiter · CTO",
+        "hint": "Optional"
+      },
+      "note": {
+        "label": "Context",
+        "placeholder": "Who you're hiring, how many per month, what stack — anything useful",
+        "hint": "Helps us prepare a relevant demo"
+      }
+    },
+    "requiredAriaLabel": "required field",
+    "submit": "Request demo",
+    "sending": "Sending…",
+    "errorPrefix": "Couldn't send",
+    "errorDetailPrefix": ": ",
+    "errorSuffix": ". Email ",
+    "errorFallback": "Error",
+    "privacyNote": "We don't share data with third parties and we don't send spam. Unsubscribe in one click, any time.",
+    "success": {
+      "title": "Request received",
+      "body": "We'll get back to you within 24 hours with demo time options."
+    }
+  }
+}

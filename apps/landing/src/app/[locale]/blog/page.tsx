@@ -1,33 +1,59 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 import AttractorBanner from '@/components/attractor-banner';
 import { Footer } from '@/components/footer';
 import { SiteHeader } from '@/components/site-header';
+import { Link } from '@/i18n/navigation';
 import { CATEGORY_LABEL, getSortedArticles } from '@/lib/articles';
+import { isLocale, type Locale } from '@/i18n/routing';
 
-export const metadata: Metadata = {
-  title: 'Блог · про скринінг інженерів у AI-ері',
-  description:
-    'Есеї merged про наймання в AI-ері: work-sample assessment, LLM-судді, рубрики, практика закритої бети.',
-  alternates: { canonical: '/blog' },
-  openGraph: {
-    title: 'merged — блог',
-    description:
-      'Практика і дослідження про технічний скринінг, рубрики оцінки та роботу з AI.',
-    url: 'https://merged.com.ua/blog',
-    type: 'website',
-  },
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+const DATE_LOCALE: Record<Locale, string> = {
+  uk: 'uk-UA',
+  fr: 'fr-FR',
+  en: 'en-US',
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('uk-UA', {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  const t = await getTranslations({ locale, namespace: 'blogIndex' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+    alternates: { canonical: `/${locale}/blog` },
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      url: `https://merged.com.ua/${locale}/blog`,
+      type: 'website',
+    },
+  };
+}
+
+function formatDate(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleDateString(DATE_LOCALE[locale], {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
 }
 
-export default function BlogIndexPage() {
+export default async function BlogIndexPage({ params }: PageProps) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+  setRequestLocale(locale);
+
+  return <BlogIndexBody locale={locale} />;
+}
+
+function BlogIndexBody({ locale }: { locale: Locale }) {
+  const t = useTranslations('blogIndex');
   const sorted = getSortedArticles();
   const [featured, ...rest] = sorted;
 
@@ -39,7 +65,7 @@ export default function BlogIndexPage() {
             href="/#zayavka"
             className="inline-flex items-center gap-1.5 font-mono text-sm text-ink/55 transition-colors duration-150 hover:text-ink"
           >
-            Запросити демо
+            {t('headerCta')}
             <span aria-hidden>→</span>
           </Link>
         }
@@ -48,21 +74,20 @@ export default function BlogIndexPage() {
       {/* Hero */}
       <section className="border-b border-ink/8">
         <div className="section-inner pt-16 pb-20 sm:pt-24 sm:pb-28">
-          <p className="label-mono text-ink/50">Блог merged</p>
+          <p className="label-mono text-ink/50">{t('eyebrow')}</p>
           <h1 className="mt-6 font-display text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.04] tracking-[-0.02em] text-ink max-w-3xl">
-            Інженерний наймо —{' '}
+            {t('titlePart1')}
             <span className="relative inline-block">
-              <span className="relative z-10">без ритуалів</span>
+              <span className="relative z-10">{t('titlePart2')}</span>
               <span
                 aria-hidden
                 className="absolute inset-x-0 bottom-1.5 h-[0.32em] bg-accent/30 -z-0 rounded-sm"
               />
             </span>
-            .
+            {t('titlePart3')}
           </h1>
           <p className="mt-6 max-w-2xl text-[1.0625rem] text-ink/65 leading-[1.75]">
-            Есеї про work-sample assessment, рубрики для LLM-судді, калібрацію
-            задач і практику закритої бети merged.
+            {t('subtitle')}
           </p>
         </div>
       </section>
@@ -94,7 +119,7 @@ export default function BlogIndexPage() {
                 <div className="flex items-center gap-3 mb-4 label-mono text-ink/45">
                   <span>{featured.readTime}</span>
                   <span className="h-1 w-1 rounded-full bg-ink/20" />
-                  <span>{formatDate(featured.publishedAt)}</span>
+                  <span>{formatDate(featured.publishedAt, locale)}</span>
                 </div>
                 <p className="text-[1.0625rem] text-ink/70 leading-[1.75] max-w-3xl">
                   {featured.punchline}
@@ -110,7 +135,7 @@ export default function BlogIndexPage() {
                   ))}
                   <div className="flex-1" />
                   <span className="text-sm font-medium text-ink inline-flex items-center gap-1.5 transition-transform duration-200 group-hover:translate-x-0.5">
-                    Читати
+                    {t('readCta')}
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
                       <path
                         d="M2.5 7h9M7.5 3l4 4-4 4"
@@ -160,7 +185,7 @@ export default function BlogIndexPage() {
                         {article.readTime}
                       </span>
                       <span className="font-mono text-xs text-ink/45">
-                        {formatDate(article.publishedAt)}
+                        {formatDate(article.publishedAt, locale)}
                       </span>
                     </div>
                     <p className="text-[0.9375rem] text-ink/65 leading-[1.7] line-clamp-3">
@@ -177,7 +202,7 @@ export default function BlogIndexPage() {
                       ))}
                       <div className="flex-1" />
                       <span className="text-sm font-medium text-ink inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        Читати
+                        {t('readCta')}
                         <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
                           <path
                             d="M2.5 7h9M7.5 3l4 4-4 4"

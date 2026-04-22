@@ -1,46 +1,35 @@
+import { useTranslations } from 'next-intl';
+
 type Metric = { value: string; label: string };
 
-const DEVELOPER_METRICS: Metric[] = [
-  { value: '0', label: 'live-coding під камерою' },
-  { value: '~2 хв', label: 'від сабміту до звіту' },
-];
-
-const MANAGER_METRICS: Metric[] = [
-  { value: '40+ год', label: 'повертається команді щомісяця' },
-  { value: '1', label: 'зустріч замість 4–6 раундів' },
-];
-
 export function ForWhom() {
+  const t = useTranslations('forWhom');
+  const developerMetrics = t.raw('developer.metrics') as Metric[];
+  const developerLines = t.raw('developer.lines') as string[];
+  const managerMetrics = t.raw('manager.metrics') as Metric[];
+  const managerLines = t.raw('manager.lines') as string[];
+
   return (
     <section className="border-b border-ink/8">
       <div className="section-inner py-24 sm:py-32">
-        <p className="label-mono text-ink/50">Для кого</p>
+        <p className="label-mono text-ink/50">{t('eyebrow')}</p>
         <h2 className="mt-5 font-display text-4xl sm:text-5xl font-semibold leading-[1.08] tracking-tight max-w-2xl">
-          Девелопер — користувач. Hiring&nbsp;Manager — платник.
+          {t('title')}
         </h2>
         <p className="mt-5 max-w-xl text-[1.0625rem] text-ink/60 leading-[1.75]">
-          Кожна роль отримує своє: девелопер — чесну асинхронну оцінку без
-          live-coding, менеджер — час команди і якісніший фінальний відбір.
+          {t('subtitle')}
         </p>
 
         <div className="mt-14 grid gap-5 md:grid-cols-2">
           <PersonaCard
-            role="Девелопери"
-            metrics={DEVELOPER_METRICS}
-            lines={[
-              'Не кодиш під стресом за 45 хвилин — береш задачу, робиш у своєму ритмі.',
-              'AI-асистент — не заборонений, а очікуваний. Твій звичний Cursor / Claude / Copilot працює.',
-              'Бачиш рубрику до початку: за що оцінюють, які сигнали важливі. Жодного "vibe check".',
-            ]}
+            role={t('developer.role')}
+            metrics={developerMetrics}
+            lines={developerLines}
           />
           <PersonaCard
-            role="Інженерні керівники"
-            metrics={MANAGER_METRICS}
-            lines={[
-              'Команда не витрачає 40 годин на місяць на скринінг-дзвінки.',
-              'Рішення на фінальній зустрічі — про людину, а не про технічні базові знання.',
-              'Видно, як кандидат думає і обґрунтовує рішення, а не тільки що написав.',
-            ]}
+            role={t('manager.role')}
+            metrics={managerMetrics}
+            lines={managerLines}
             dark
           />
         </div>
@@ -69,7 +58,11 @@ function PersonaCard({
       }
     >
       {/* Role header */}
-      <div className={`px-5 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-6 border-b ${dark ? 'border-white/8' : 'border-ink/6'}`}>
+      <div
+        className={`px-5 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-6 border-b ${
+          dark ? 'border-white/8' : 'border-ink/6'
+        }`}
+      >
         <h3
           className={`font-display text-2xl font-semibold ${
             dark ? 'text-accent' : 'text-ink'

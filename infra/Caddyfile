@@ -14,9 +14,46 @@
   }
 }
 
+(localeRootRedirects) {
+  @rootOnly path /
+
+  # Honor NEXT_LOCALE cookie first
+  @cookieUk {
+    path /
+    header Cookie *NEXT_LOCALE=uk*
+  }
+  @cookieFr {
+    path /
+    header Cookie *NEXT_LOCALE=fr*
+  }
+  @cookieEn {
+    path /
+    header Cookie *NEXT_LOCALE=en*
+  }
+  redir @cookieUk /uk/ 302
+  redir @cookieFr /fr/ 302
+  redir @cookieEn /en/ 302
+
+  # Fall through to IP-based geo
+  @geoUk {
+    path /
+    header CF-IPCountry UA
+  }
+  @geoFr {
+    path /
+    header_regexp CF-IPCountry ^(FR|LU)$
+  }
+  redir @geoUk /uk/ 302
+  redir @geoFr /fr/ 302
+
+  # Default: English for everyone else who hits /
+  redir @rootOnly /en/ 302
+}
+
 merged.com.ua, merged.legal.org.ua {
   encode zstd gzip
   import securityHeaders
+  import localeRootRedirects
   reverse_proxy landing:8080
   log {
     output file /var/log/caddy/merged.log

@@ -1,6 +1,9 @@
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 export function Footer() {
+  const t = useTranslations('footer');
   return (
     <footer className="bg-paper-dim border-t border-ink/6">
       <div className="section-inner py-10 sm:py-12">
@@ -8,72 +11,68 @@ export function Footer() {
           {/* Brand */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2.5">
-              <LogoMark />
+              <LogoMark alt={t('logoAlt')} />
               <span className="font-display text-base font-semibold text-ink tracking-tight">
                 merged
               </span>
             </div>
             <p className="font-mono text-xs text-ink/40 max-w-[18rem] leading-relaxed">
-              Технічний скринінг без співбесід — work-sample assessment для AI-ери.
+              {t('tagline')}
             </p>
           </div>
 
           {/* Links */}
           <div className="flex flex-col gap-2">
-            <p className="label-mono text-ink/35 mb-1">Звʼязок</p>
+            <p className="label-mono text-ink/35 mb-1">{t('contactHeading')}</p>
             <a
-              href="mailto:request@merged.com.ua"
+              href={`mailto:${t('contactEmail')}`}
               className="font-mono text-sm text-ink/55 hover:text-ink transition-colors duration-150 focus-visible:underline"
             >
-              request@merged.com.ua
+              {t('contactEmail')}
             </a>
-            <a
-              href="/blog/"
+            <Link
+              href="/blog"
               className="font-mono text-sm text-ink/55 hover:text-ink transition-colors duration-150 focus-visible:underline"
             >
-              Блог
-            </a>
+              {t('blogLink')}
+            </Link>
           </div>
 
           {/* Legal */}
           <div className="flex flex-col gap-2">
-            <p className="label-mono text-ink/35 mb-1">Документи</p>
+            <p className="label-mono text-ink/35 mb-1">{t('documentsHeading')}</p>
             <div className="flex flex-col gap-1.5">
-              <a
-                href="/privacy/"
+              <Link
+                href="/privacy"
                 className="font-mono text-sm text-ink/55 hover:text-ink transition-colors duration-150 focus-visible:underline"
               >
-                Приватність
-              </a>
-              <a
-                href="/terms/"
+                {t('privacyLink')}
+              </Link>
+              <Link
+                href="/terms"
                 className="font-mono text-sm text-ink/55 hover:text-ink transition-colors duration-150 focus-visible:underline"
               >
-                Умови використання
-              </a>
+                {t('termsLink')}
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-ink/6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-xs text-ink/35">
-            © 2026 merged · Україна
-          </p>
-          <p className="font-mono text-xs text-ink/30">
-            Закрита бета · TID 2026
-          </p>
+          <p className="font-mono text-xs text-ink/35">{t('copyright')}</p>
+          <p className="font-mono text-xs text-ink/30">{t('betaNote')}</p>
         </div>
       </div>
     </footer>
   );
 }
 
-function LogoMark() {
+function LogoMark({ alt }: { alt: string }) {
   return (
     <Image
       src="/brand/logo-ink-128.png"
-      alt="merged"
+      alt={alt}
       width={22}
       height={22}
       className="shrink-0"

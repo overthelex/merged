@@ -1,14 +1,20 @@
 'use client';
 
 import { useState, useId } from 'react';
+import { useTranslations } from 'next-intl';
 
 const PORTAL = process.env.NEXT_PUBLIC_PORTAL_BASE_URL ?? 'https://portal.merged.com.ua';
 
 type Status = 'idle' | 'sending' | 'ok' | 'err';
 
+type FieldKey = 'name' | 'company' | 'email' | 'role' | 'note';
+
 export function LeadForm() {
+  const t = useTranslations('leadForm');
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
+
+  const commitments = t.raw('commitments') as string[];
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,7 +43,7 @@ export function LeadForm() {
       form.reset();
     } catch (err) {
       setStatus('err');
-      setError(err instanceof Error ? err.message : 'Помилка');
+      setError(err instanceof Error ? err.message : t('errorFallback'));
     }
   }
 
@@ -47,25 +53,22 @@ export function LeadForm() {
         <div className="grid gap-14 lg:grid-cols-[1fr_1.25fr] lg:items-start lg:gap-20">
           {/* Left — value prop */}
           <div className="lg:pt-2">
-            <p className="label-mono text-accent">Демо</p>
+            <p className="label-mono text-accent">{t('eyebrow')}</p>
             <h2 className="mt-5 font-display text-4xl sm:text-5xl font-semibold leading-[1.08] tracking-tight">
-              Покажемо на вашому стеку.
+              {t('title')}
             </h2>
             <p className="mt-6 text-[1.0625rem] text-paper/65 leading-[1.75]">
-              15 хвилин. Ви розкажете, кого наймаєте. Ми покажемо, як виглядав би
-              скринінг у merged замість дзвінків. Приклади задач під ваш стек —
-              у вашому поштовику того ж дня.
+              {t('subtitle')}
             </p>
 
             {/* Commitment list */}
             <ul className="mt-8 space-y-3">
-              {[
-                'Закрита бета, ринок України',
-                'Без передоплати, без контракту',
-                'Відповідь протягом 24 годин',
-              ].map((item) => (
+              {commitments.map((item) => (
                 <li key={item} className="flex items-center gap-3">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" aria-hidden />
+                  <span
+                    className="h-1.5 w-1.5 rounded-full bg-accent shrink-0"
+                    aria-hidden
+                  />
                   <span className="font-mono text-sm text-paper/60">{item}</span>
                 </li>
               ))}
@@ -73,14 +76,16 @@ export function LeadForm() {
 
             {/* Trust signal */}
             <div className="mt-10 rounded-xl border border-white/8 bg-white/4 px-5 py-4">
-              <p className="label-mono text-white/40 mb-2">Альтернатива</p>
+              <p className="label-mono text-white/40 mb-2">
+                {t('alternative.label')}
+              </p>
               <p className="text-sm text-paper/60 leading-relaxed">
-                Не хочете форму? Напишіть одразу:{' '}
+                {t('alternative.prefix')}
                 <a
-                  href="mailto:request@merged.com.ua"
+                  href={`mailto:${t('alternative.email')}`}
                   className="text-accent underline underline-offset-2 hover:text-accent/80 transition-colors"
                 >
-                  request@merged.com.ua
+                  {t('alternative.email')}
                 </a>
               </p>
             </div>
@@ -93,41 +98,12 @@ export function LeadForm() {
             ) : (
               <form onSubmit={onSubmit} className="p-5 sm:p-8 lg:p-10 space-y-6">
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <Field
-                    name="name"
-                    label="Імʼя"
-                    placeholder="Олена"
-                    hint="Як вас звати"
-                    required
-                  />
-                  <Field
-                    name="company"
-                    label="Компанія"
-                    placeholder="Tech Studio"
-                    hint="Назва організації"
-                    required
-                  />
+                  <Field fieldKey="name" required />
+                  <Field fieldKey="company" required />
                 </div>
-                <Field
-                  name="email"
-                  label="Робочий email"
-                  type="email"
-                  placeholder="olena@techstudio.ua"
-                  hint="Відповімо на цю адресу"
-                  required
-                />
-                <Field
-                  name="role"
-                  label="Ваша роль"
-                  placeholder="Head of Engineering · Recruiter · CTO"
-                  hint="Необовʼязково"
-                />
-                <TextareaField
-                  name="note"
-                  label="Контекст"
-                  placeholder="Кого наймаєте, скільки на місяць, який стек — що завгодно корисне"
-                  hint="Допоможе підготувати релевантне демо"
-                />
+                <Field fieldKey="email" type="email" required />
+                <Field fieldKey="role" />
+                <TextareaField fieldKey="note" />
 
                 <div className="pt-1">
                   <button
@@ -138,29 +114,30 @@ export function LeadForm() {
                     {status === 'sending' ? (
                       <span className="flex items-center justify-center gap-2">
                         <SpinnerIcon />
-                        Відправляємо…
+                        {t('sending')}
                       </span>
                     ) : (
-                      'Запросити демо'
+                      t('submit')
                     )}
                   </button>
 
                   {status === 'err' && (
                     <p className="mt-3 text-sm text-red-400 text-center" role="alert">
-                      Не вдалося надіслати{error ? `: ${error}` : ''}. Напишіть на{' '}
+                      {t('errorPrefix')}
+                      {error ? `${t('errorDetailPrefix')}${error}` : ''}
+                      {t('errorSuffix')}
                       <a
                         className="underline underline-offset-2 hover:text-red-300 transition-colors"
-                        href="mailto:request@merged.com.ua"
+                        href={`mailto:${t('alternative.email')}`}
                       >
-                        request@merged.com.ua
+                        {t('alternative.email')}
                       </a>
                     </p>
                   )}
                 </div>
 
                 <p className="text-xs text-paper/35 text-center leading-relaxed">
-                  Ми не передаємо дані третім сторонам і не надсилаємо спам.
-                  Відписатися — одним кліком у будь-який момент.
+                  {t('privacyNote')}
                 </p>
               </form>
             )}
@@ -174,64 +151,54 @@ export function LeadForm() {
 /* ── Field components ────────────────────────────────────────────────── */
 
 function Field({
-  name,
-  label,
+  fieldKey,
   type = 'text',
-  placeholder,
-  hint,
   required,
 }: {
-  name: string;
-  label: string;
+  fieldKey: FieldKey;
   type?: string;
-  placeholder?: string;
-  hint?: string;
   required?: boolean;
 }) {
+  const t = useTranslations('leadForm');
   const id = useId();
   const hintId = `${id}-hint`;
+  const label = t(`fields.${fieldKey}.label`);
+  const placeholder = t(`fields.${fieldKey}.placeholder`);
+  const hint = t(`fields.${fieldKey}.hint`);
 
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="flex items-center gap-1.5">
         <span className="label-mono text-paper/60">{label}</span>
         {required && (
-          <span className="label-mono text-accent" aria-label="обовʼязкове поле">
+          <span className="label-mono text-accent" aria-label={t('requiredAriaLabel')}>
             *
           </span>
         )}
       </label>
       <input
         id={id}
-        name={name}
+        name={fieldKey}
         type={type}
         required={required}
         placeholder={placeholder}
-        aria-describedby={hint ? hintId : undefined}
+        aria-describedby={hintId}
         className="w-full rounded-lg border border-white/10 bg-ink px-4 py-3 text-sm text-paper placeholder:text-paper/25 transition-all duration-150 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/40"
       />
-      {hint && (
-        <span id={hintId} className="label-mono text-paper/30">
-          {hint}
-        </span>
-      )}
+      <span id={hintId} className="label-mono text-paper/30">
+        {hint}
+      </span>
     </div>
   );
 }
 
-function TextareaField({
-  name,
-  label,
-  placeholder,
-  hint,
-}: {
-  name: string;
-  label: string;
-  placeholder?: string;
-  hint?: string;
-}) {
+function TextareaField({ fieldKey }: { fieldKey: FieldKey }) {
+  const t = useTranslations('leadForm');
   const id = useId();
   const hintId = `${id}-hint`;
+  const label = t(`fields.${fieldKey}.label`);
+  const placeholder = t(`fields.${fieldKey}.placeholder`);
+  const hint = t(`fields.${fieldKey}.hint`);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -240,17 +207,15 @@ function TextareaField({
       </label>
       <textarea
         id={id}
-        name={name}
+        name={fieldKey}
         rows={3}
         placeholder={placeholder}
-        aria-describedby={hint ? hintId : undefined}
+        aria-describedby={hintId}
         className="w-full rounded-lg border border-white/10 bg-ink px-4 py-3 text-sm text-paper placeholder:text-paper/25 resize-none transition-all duration-150 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/40"
       />
-      {hint && (
-        <span id={hintId} className="label-mono text-paper/30">
-          {hint}
-        </span>
-      )}
+      <span id={hintId} className="label-mono text-paper/30">
+        {hint}
+      </span>
     </div>
   );
 }
@@ -258,6 +223,7 @@ function TextareaField({
 /* ── Success state ───────────────────────────────────────────────────── */
 
 function SuccessState() {
+  const t = useTranslations('leadForm.success');
   return (
     <div className="p-5 sm:p-8 lg:p-10 flex flex-col items-center justify-center min-h-[360px] text-center gap-5">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-accent">
@@ -272,11 +238,9 @@ function SuccessState() {
         </svg>
       </div>
       <div>
-        <p className="font-display text-xl font-semibold text-paper">
-          Заявку отримано
-        </p>
+        <p className="font-display text-xl font-semibold text-paper">{t('title')}</p>
         <p className="mt-2 text-sm text-paper/55 leading-relaxed max-w-xs">
-          Повернемось протягом 24 годин з пропозицією щодо зручного часу демо.
+          {t('body')}
         </p>
       </div>
     </div>

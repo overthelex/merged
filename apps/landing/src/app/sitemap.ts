@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getSortedArticles } from '@/lib/articles';
+import { locales } from '@/i18n/routing';
 
 // Required by Next 16 when the app uses `output: 'export'` — otherwise the
 // metadata route is treated as potentially dynamic and the build refuses.
@@ -11,19 +12,27 @@ const SITE = 'https://merged.com.ua';
 // — otherwise Google would see a redirect and treat it as a soft 404 signal.
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: `${SITE}/`, changeFrequency: 'weekly', priority: 1.0, lastModified: now },
-    { url: `${SITE}/blog/`, changeFrequency: 'weekly', priority: 0.9, lastModified: now },
-    { url: `${SITE}/privacy/`, changeFrequency: 'yearly', priority: 0.3, lastModified: now },
-    { url: `${SITE}/terms/`, changeFrequency: 'yearly', priority: 0.3, lastModified: now },
-  ];
+  const sortedArticles = getSortedArticles();
 
-  const articles = getSortedArticles().map((a) => ({
-    url: `${SITE}/blog/${a.slug}/`,
-    lastModified: new Date(a.publishedAt),
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }));
+  const entries: MetadataRoute.Sitemap = [];
 
-  return [...staticPages, ...articles];
+  for (const locale of locales) {
+    entries.push(
+      { url: `${SITE}/${locale}/`, changeFrequency: 'weekly', priority: 1.0, lastModified: now },
+      { url: `${SITE}/${locale}/blog/`, changeFrequency: 'weekly', priority: 0.9, lastModified: now },
+      { url: `${SITE}/${locale}/privacy/`, changeFrequency: 'yearly', priority: 0.3, lastModified: now },
+      { url: `${SITE}/${locale}/terms/`, changeFrequency: 'yearly', priority: 0.3, lastModified: now },
+    );
+
+    for (const article of sortedArticles) {
+      entries.push({
+        url: `${SITE}/${locale}/blog/${article.slug}/`,
+        lastModified: new Date(article.publishedAt),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      });
+    }
+  }
+
+  return entries;
 }
