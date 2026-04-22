@@ -1,66 +1,45 @@
-const SIGNALS = [
-  {
-    category: 'Автоматичний CI',
-    label: 'Тести пройшли',
-    weight: 20,
-    type: 'auto' as const,
-    note: 'Детерміновано, без помилок вибірки',
-  },
-  {
-    category: 'Автоматичний CI',
-    label: 'Фокус і розмір диффу',
-    weight: 15,
-    type: 'auto' as const,
-    note: 'Мінімальні зміни, без непотрібних правок',
-  },
-  {
-    category: 'Автоматичний CI',
-    label: 'Якість комітів',
-    weight: 10,
-    type: 'auto' as const,
-    note: 'Atomic commits, Conventional Commits',
-  },
-  {
-    category: 'LLM-суддя',
-    label: 'Rationale у PR-описі',
-    weight: 20,
-    type: 'llm' as const,
-    note: 'Чи пояснено «чому» а не тільки «що»',
-  },
-  {
-    category: 'LLM-суддя',
-    label: 'Декомпозиція задачі',
-    weight: 20,
-    type: 'llm' as const,
-    note: 'Хід думок, кроки вирішення',
-  },
-  {
-    category: 'LLM-суддя',
-    label: 'Trade-off-и та архітектура',
-    weight: 15,
-    type: 'llm' as const,
-    note: 'Альтернативи розглянуті, вибір обґрунтований',
-  },
-];
+import { useTranslations } from 'next-intl';
 
-const autoTotal = SIGNALS.filter((s) => s.type === 'auto').reduce((a, s) => a + s.weight, 0);
-const llmTotal = SIGNALS.filter((s) => s.type === 'llm').reduce((a, s) => a + s.weight, 0);
+interface SignalItem {
+  label: string;
+  note: string;
+}
+
+// Weights are structural (design-time), not copy — they're not translated.
+const AUTO_WEIGHTS = [20, 15, 10];
+const LLM_WEIGHTS = [20, 20, 15];
+
+const autoTotal = AUTO_WEIGHTS.reduce((a, b) => a + b, 0);
+const llmTotal = LLM_WEIGHTS.reduce((a, b) => a + b, 0);
 
 export function Signals() {
+  const t = useTranslations('signals');
+  const autoItems = t.raw('items.auto') as SignalItem[];
+  const llmItems = t.raw('items.llm') as SignalItem[];
+
+  const autoEnriched = autoItems.map((s, i) => ({
+    ...s,
+    weight: AUTO_WEIGHTS[i] ?? 0,
+    type: 'auto' as const,
+  }));
+  const llmEnriched = llmItems.map((s, i) => ({
+    ...s,
+    weight: LLM_WEIGHTS[i] ?? 0,
+    type: 'llm' as const,
+  }));
+
   return (
     <section className="border-b border-ink/8">
       <div className="section-inner py-24 sm:py-32">
         <div className="grid gap-16 lg:grid-cols-[1fr_1.15fr] lg:items-start">
           {/* Left — copy */}
           <div className="lg:pt-2">
-            <p className="label-mono text-ink/50">Що саме міряємо</p>
+            <p className="label-mono text-ink/50">{t('eyebrow')}</p>
             <h2 className="mt-5 font-display text-4xl sm:text-5xl font-semibold leading-[1.08] tracking-tight">
-              «Зелений CI» — лише 20% сигналу.
+              {t('title')}
             </h2>
             <p className="mt-6 text-[1.0625rem] text-ink/65 leading-[1.75]">
-              Інші 80% — те, що LLM-суддя по структурованій рубриці робить
-              краще за людину-інтервʼюера: читає весь PR, описання, історію
-              комітів, відповіді на коментарі. Без втоми, без упереджень.
+              {t('subtitle')}
             </p>
 
             {/* Split summary */}
@@ -69,7 +48,9 @@ export function Signals() {
                 <div className="tabular font-display text-3xl font-semibold text-ink">
                   {autoTotal}%
                 </div>
-                <div className="mt-1 label-mono text-ink/50">Автоматичний CI</div>
+                <div className="mt-1 label-mono text-ink/50">
+                  {t('summary.autoLabel')}
+                </div>
                 <div className="mt-3 h-1 rounded-full bg-ink/8">
                   <div
                     className="h-full rounded-full bg-ink/30"
@@ -81,7 +62,9 @@ export function Signals() {
                 <div className="tabular font-display text-3xl font-semibold text-accent">
                   {llmTotal}%
                 </div>
-                <div className="mt-1 label-mono text-accent/70">LLM-суддя</div>
+                <div className="mt-1 label-mono text-accent/70">
+                  {t('summary.llmLabel')}
+                </div>
                 <div className="mt-3 h-1 rounded-full bg-accent/15">
                   <div
                     className="h-full rounded-full bg-accent"
@@ -95,17 +78,21 @@ export function Signals() {
           {/* Right — rubric table */}
           <div className="rounded-2xl border border-ink/8 bg-surface shadow-card-md overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-ink/6">
-              <span className="label-mono text-ink/50">Ваги рубрики</span>
-              <span className="tabular label-mono text-ink/40">усього 100%</span>
+              <span className="label-mono text-ink/50">{t('rubric.heading')}</span>
+              <span className="tabular label-mono text-ink/40">
+                {t('rubric.totalLabel')}
+              </span>
             </div>
 
             {/* Auto section */}
             <div>
               <div className="px-4 py-2.5 sm:px-6 sm:py-3 bg-ink/3 border-b border-ink/5">
-                <span className="label-mono text-ink/40">Автоматичний CI</span>
+                <span className="label-mono text-ink/40">
+                  {t('rubric.autoSectionLabel')}
+                </span>
               </div>
               <ul className="divide-y divide-ink/5">
-                {SIGNALS.filter((s) => s.type === 'auto').map((s) => (
+                {autoEnriched.map((s) => (
                   <SignalRow key={s.label} signal={s} />
                 ))}
               </ul>
@@ -114,19 +101,19 @@ export function Signals() {
             {/* LLM section */}
             <div className="border-t border-ink/8">
               <div className="px-4 py-2.5 sm:px-6 sm:py-3 bg-accent/5 border-b border-ink/5">
-                <span className="label-mono text-accent/70">LLM-суддя</span>
+                <span className="label-mono text-accent/70">
+                  {t('rubric.llmSectionLabel')}
+                </span>
               </div>
               <ul className="divide-y divide-ink/5">
-                {SIGNALS.filter((s) => s.type === 'llm').map((s) => (
+                {llmEnriched.map((s) => (
                   <SignalRow key={s.label} signal={s} />
                 ))}
               </ul>
             </div>
 
             <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-t border-ink/6 bg-ink/2">
-              <p className="label-mono text-ink/35">
-                * Ваги налаштовуються на рівні template-а задачі
-              </p>
+              <p className="label-mono text-ink/35">{t('rubric.footnote')}</p>
             </div>
           </div>
         </div>
@@ -138,7 +125,7 @@ export function Signals() {
 function SignalRow({
   signal,
 }: {
-  signal: (typeof SIGNALS)[number];
+  signal: { label: string; note: string; weight: number; type: 'auto' | 'llm' };
 }) {
   return (
     <li className="px-4 py-3.5 sm:px-6 sm:py-4">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface ArticleShareProps {
   title: string;
@@ -9,6 +10,7 @@ interface ArticleShareProps {
 }
 
 export function ArticleShare({ title, punchline, url }: ArticleShareProps) {
+  const t = useTranslations('articleShare');
   const [copied, setCopied] = useState(false);
 
   const shareLinkedIn = () => {
@@ -16,7 +18,10 @@ export function ArticleShare({ title, punchline, url }: ArticleShareProps) {
       url,
       text: `${punchline}\n\n#merged #HiringInAIEra`,
     });
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?${params.toString()}`, '_blank');
+    window.open(
+      `https://www.linkedin.com/sharing/share-offsite/?${params.toString()}`,
+      '_blank',
+    );
   };
 
   const shareX = () => {
@@ -44,36 +49,40 @@ export function ArticleShare({ title, punchline, url }: ArticleShareProps) {
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-ink/8 bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
-      <p className="label-mono text-ink/55">Поділитись</p>
+      <p className="label-mono text-ink/55">{t('label')}</p>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={shareLinkedIn}
           className={`${btn} border-ink/10 bg-paper-dim text-ink/75 hover:border-ink/25 hover:text-ink`}
         >
-          LinkedIn
+          {t('linkedin')}
         </button>
         <button
           type="button"
           onClick={shareX}
           className={`${btn} border-ink/10 bg-paper-dim text-ink/75 hover:border-ink/25 hover:text-ink`}
         >
-          X
+          {t('x')}
         </button>
         <button
           type="button"
           onClick={shareTelegram}
           className={`${btn} border-ink/10 bg-paper-dim text-ink/75 hover:border-ink/25 hover:text-ink`}
         >
-          Telegram
+          {t('telegram')}
         </button>
         <button
           type="button"
           onClick={copyLink}
-          className={`${btn} ${copied ? 'border-accent/40 bg-accent/10 text-accent-dim' : 'border-ink/10 bg-paper-dim text-ink/75 hover:border-ink/25 hover:text-ink'}`}
+          className={`${btn} ${
+            copied
+              ? 'border-accent/40 bg-accent/10 text-accent-dim'
+              : 'border-ink/10 bg-paper-dim text-ink/75 hover:border-ink/25 hover:text-ink'
+          }`}
           aria-live="polite"
         >
-          {copied ? 'Скопійовано' : 'Копіювати посилання'}
+          {copied ? t('copied') : t('copyLink')}
         </button>
       </div>
     </div>

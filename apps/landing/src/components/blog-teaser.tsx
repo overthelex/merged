@@ -1,8 +1,16 @@
-import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { CATEGORY_LABEL, getSortedArticles } from '@/lib/articles';
+import { isLocale, type Locale } from '@/i18n/routing';
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('uk-UA', {
+const DATE_LOCALE: Record<Locale, string> = {
+  uk: 'uk-UA',
+  fr: 'fr-FR',
+  en: 'en-US',
+};
+
+function formatDate(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleDateString(DATE_LOCALE[locale], {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -10,6 +18,9 @@ function formatDate(iso: string): string {
 }
 
 export function BlogTeaser() {
+  const t = useTranslations('blogTeaser');
+  const rawLocale = useLocale();
+  const locale: Locale = isLocale(rawLocale) ? rawLocale : 'en';
   const latest = getSortedArticles().slice(0, 3);
   if (latest.length === 0) return null;
 
@@ -18,14 +29,12 @@ export function BlogTeaser() {
       <div className="section-inner py-24 sm:py-32">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="label-mono text-ink/50">Блог</p>
+            <p className="label-mono text-ink/50">{t('eyebrow')}</p>
             <h2 className="mt-5 font-display text-4xl sm:text-5xl font-semibold leading-[1.08] tracking-tight">
-              Есеї про наймо в AI-ері.
+              {t('title')}
             </h2>
             <p className="mt-5 text-[1.0625rem] text-ink/65 leading-[1.75]">
-              Практика скринінгу, рубрики LLM-судді, відкриті звіти закритої
-              бети, інструкції для рекрутерів і кандидатів — без маркетингу й
-              без «book a demo».
+              {t('subtitle')}
             </p>
           </div>
 
@@ -33,7 +42,7 @@ export function BlogTeaser() {
             href="/blog"
             className="group inline-flex items-center gap-2 self-start rounded-lg border border-ink/12 bg-surface px-5 py-3 text-sm font-medium text-ink/80 shadow-card transition-all duration-150 hover:border-ink/25 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 sm:self-auto"
           >
-            Всі статті
+            {t('allArticles')}
             <svg
               width="14"
               height="14"
@@ -79,17 +88,11 @@ export function BlogTeaser() {
 
                 <div className="mt-5 flex items-center justify-between">
                   <span className="font-mono text-xs text-ink/40">
-                    {formatDate(article.publishedAt)}
+                    {formatDate(article.publishedAt, locale)}
                   </span>
                   <span className="text-sm font-medium text-ink inline-flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    Читати
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                      aria-hidden
-                    >
+                    {t('readCta')}
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
                       <path
                         d="M2.5 7h9M7.5 3l4 4-4 4"
                         stroke="currentColor"

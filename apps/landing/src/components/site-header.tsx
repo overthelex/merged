@@ -1,5 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { LocaleSwitcher } from './locale-switcher';
 
 interface SiteHeaderProps {
   variant?: 'default' | 'minimal';
@@ -7,15 +9,23 @@ interface SiteHeaderProps {
 }
 
 export function SiteHeader({ variant = 'default', rightSlot }: SiteHeaderProps) {
+  const t = useTranslations('siteHeader');
+  const navLinks = [
+    { href: '/#problema', label: t('nav.problem') },
+    { href: '/#yak-tse-pratsuye', label: t('nav.howItWorks') },
+    { href: '/blog', label: t('nav.blog') },
+    { href: '/#zayavka', label: t('nav.demo') },
+  ];
+
   return (
     <nav
       className="section-inner flex items-center justify-between pt-6"
-      aria-label="Головна навігація"
+      aria-label={t('navAriaLabel')}
     >
       <Link href="/" className="flex items-center gap-2.5 no-underline">
         <Image
           src="/brand/logo-ink-128.png"
-          alt="merged"
+          alt={t('logoAlt')}
           width={28}
           height={28}
           priority
@@ -26,16 +36,14 @@ export function SiteHeader({ variant = 'default', rightSlot }: SiteHeaderProps) 
         </span>
       </Link>
       {rightSlot ? (
-        <div className="flex items-center gap-6">{rightSlot}</div>
+        <div className="flex items-center gap-6">
+          {rightSlot}
+          <LocaleSwitcher />
+        </div>
       ) : (
         variant === 'default' && (
-          <div className="hidden gap-7 sm:flex">
-            {[
-              { href: '/#problema', label: 'Проблема' },
-              { href: '/#yak-tse-pratsuye', label: 'Як працює' },
-              { href: '/blog', label: 'Блог' },
-              { href: '/#zayavka', label: 'Демо' },
-            ].map((link) => (
+          <div className="hidden items-center gap-7 sm:flex">
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -44,6 +52,7 @@ export function SiteHeader({ variant = 'default', rightSlot }: SiteHeaderProps) 
                 {link.label}
               </Link>
             ))}
+            <LocaleSwitcher />
           </div>
         )
       )}

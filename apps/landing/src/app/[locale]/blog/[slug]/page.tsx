@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -8,22 +9,40 @@ import { ArticleShare } from '@/components/article-share';
 import AttractorBanner from '@/components/attractor-banner';
 import { Footer } from '@/components/footer';
 import { SiteHeader } from '@/components/site-header';
+import { Link } from '@/i18n/navigation';
 import { articles, CATEGORY_LABEL, getArticle } from '@/lib/articles';
+import { isLocale, locales, type Locale } from '@/i18n/routing';
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
+const DATE_LOCALE: Record<Locale, string> = {
+  uk: 'uk-UA',
+  fr: 'fr-FR',
+  en: 'en-US',
+};
+
+const HTML_LANG: Record<Locale, string> = {
+  uk: 'uk-UA',
+  fr: 'fr-FR',
+  en: 'en-US',
+};
+
 export function generateStaticParams() {
-  return articles.map((article) => ({ slug: article.slug }));
+  return locales.flatMap((locale) =>
+    articles.map((article) => ({ locale, slug: article.slug })),
+  );
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  if (!isLocale(locale)) return {};
+  const t = await getTranslations({ locale, namespace: 'blogArticle' });
   const article = getArticle(slug);
-  if (!article) return { title: 'Статтю не знайдено' };
+  if (!article) return { title: t('notFoundTitle') };
 
-  const url = `https://merged.com.ua/blog/${article.slug}`;
+  const url = `https://merged.com.ua/${locale}/blog/${article.slug}`;
   return {
     title: article.title,
     description: article.punchline,
@@ -47,8 +66,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('uk-UA', {
+function formatDate(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleDateString(DATE_LOCALE[locale], {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -56,11 +75,22 @@ function formatDate(iso: string): string {
 }
 
 export default async function ArticlePage({ params }: PageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  if (!isLocale(locale)) notFound();
+  setRequestLocale(locale);
+
   const article = getArticle(slug);
   if (!article) notFound();
 
-  const url = `https://merged.com.ua/blog/${article.slug}`;
+  return <ArticleBody locale={locale} slug={slug} />;
+}
+
+function ArticleBody({ locale, slug }: { locale: Locale; slug: string }) {
+  const t = useTranslations('blogArticle');
+  const article = getArticle(slug);
+  if (!article) notFound();
+
+  const url = `https://merged.com.ua/${locale}/blog/${article.slug}`;
   // Strip leading H1 — we render the title in the banner.
   const body = article.content.replace(/^#\s+.+\n+/, '');
 
@@ -72,7 +102,7 @@ export default async function ArticlePage({ params }: PageProps) {
     url,
     datePublished: article.publishedAt,
     dateModified: article.publishedAt,
-    inLanguage: 'uk-UA',
+    inLanguage: HTML_LANG[locale],
     keywords: article.tags.join(', '),
     articleSection: CATEGORY_LABEL[article.category],
     author: { '@type': 'Organization', name: 'merged', url: 'https://merged.com.ua' },
@@ -96,7 +126,7 @@ export default async function ArticlePage({ params }: PageProps) {
             className="inline-flex items-center gap-1.5 font-mono text-sm text-ink/55 transition-colors duration-150 hover:text-ink"
           >
             <span aria-hidden>←</span>
-            Усі статті
+            {t('backToIndex')}
           </Link>
         }
       />
@@ -122,7 +152,7 @@ export default async function ArticlePage({ params }: PageProps) {
         <span className="font-mono text-xs text-ink/45">{article.readTime}</span>
         <span className="h-1 w-1 rounded-full bg-ink/20" />
         <span className="font-mono text-xs text-ink/45">
-          {formatDate(article.publishedAt)}
+          {formatDate(article.publishedAt, locale)}
         </span>
       </div>
 
@@ -168,15 +198,14 @@ export default async function ArticlePage({ params }: PageProps) {
           href="/#zayavka"
           className="mt-6 block rounded-2xl border border-ink/10 bg-ink text-paper p-6 sm:p-7 no-underline shadow-card-md transition-all duration-200 hover:shadow-card-lg hover:border-ink/25 group"
         >
-          <p className="label-mono text-accent mb-2">Спробувати merged</p>
+          <p className="label-mono text-accent mb-2">{t('ctaEyebrow')}</p>
           <div className="flex items-start justify-between gap-4 sm:gap-6">
             <div>
               <p className="font-display text-xl sm:text-2xl font-semibold text-paper leading-tight">
-                Технічний скринінг без співбесід
+                {t('ctaTitle')}
               </p>
               <p className="mt-2 text-sm text-paper/65 leading-relaxed max-w-md">
-                Калібрована задача, автоматична рубрика, звіт за ~2 хвилини.
-                Закрита бета, Q2 2026.
+                {t('ctaBody')}
               </p>
             </div>
             <svg
