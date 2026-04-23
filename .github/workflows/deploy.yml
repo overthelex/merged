@@ -180,6 +180,15 @@ jobs:
           sudo docker image prune -f
           EOF
 
+      - name: Reload Caddy
+        # docker compose up -d does not re-read a bind-mounted Caddyfile; an
+        # explicit graceful reload is needed whenever infra/Caddyfile changes.
+        # Harmless no-op when the Caddyfile is unchanged. Fails loudly on a
+        # bad config so we don't silently keep serving the previous one.
+        run: |
+          ssh -o IdentitiesOnly=yes -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+            'sudo docker exec merged-caddy caddy reload --config /etc/caddy/Caddyfile'
+
       - name: Health check
         run: |
           sleep 15
