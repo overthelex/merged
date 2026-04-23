@@ -8,6 +8,7 @@ import { SiteHeader } from '@/components/site-header';
 import { Link } from '@/i18n/navigation';
 import { CATEGORY_LABEL, getSortedArticles } from '@/lib/articles';
 import { isLocale, type Locale } from '@/i18n/routing';
+import { localizedAlternates } from '@/i18n/alternates';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -26,7 +27,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: t('metaTitle'),
     description: t('metaDescription'),
-    alternates: { canonical: `/${locale}/blog` },
+    alternates: {
+      canonical: `/${locale}/blog`,
+      languages: localizedAlternates((l) => `/${l}/blog`),
+    },
     openGraph: {
       title: t('ogTitle'),
       description: t('ogDescription'),

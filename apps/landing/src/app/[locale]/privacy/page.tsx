@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { isLocale } from '@/i18n/routing';
+import { localizedAlternates } from '@/i18n/alternates';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -15,7 +16,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: t('metaTitle'),
     description: t('metaDescription'),
-    alternates: { canonical: `/${locale}/privacy` },
+    alternates: {
+      canonical: `/${locale}/privacy`,
+      languages: localizedAlternates((l) => `/${l}/privacy`),
+    },
   };
 }
 
