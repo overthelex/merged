@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales, isLocale, type Locale } from '@/i18n/routing';
+import { localizedAlternates } from '@/i18n/alternates';
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -63,12 +64,7 @@ export async function generateMetadata({
     description: t('description'),
     alternates: {
       canonical: `/${locale}`,
-      languages: {
-        uk: '/uk',
-        fr: '/fr',
-        en: '/en',
-        'x-default': '/en',
-      },
+      languages: localizedAlternates((l) => `/${l}`),
     },
     openGraph: {
       type: 'website',
