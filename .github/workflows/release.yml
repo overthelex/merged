@@ -9,6 +9,14 @@ permissions:
   contents: write
   pull-requests: write
 
+# Serialize runs so concurrent merges don't race on the same version number.
+# Without this, two PRs merging within seconds both read the same package.json
+# version, both calculate the same bump, and the second one's `gh release create`
+# fails with HTTP 422 "Release.tag_name already exists".
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     if: >
@@ -39,8 +47,16 @@ jobs:
 
       - name: Get current version
         id: current
+        # Read the latest published tag, not package.json at the PR's merge commit.
+        # The merge commit is stale: after a previous queued Release run bumps
+        # main to vX, this run's checkout still sees the pre-bump package.json
+        # and would recompute the same vX, colliding on tag creation.
         run: |
-          VERSION=$(jq -r .version package.json)
+          git fetch --tags --force origin
+          VERSION=$(git tag -l 'v*.*.*' --sort=-v:refname | head -1 | sed 's/^v//')
+          if [ -z "$VERSION" ]; then
+            VERSION=$(jq -r .version package.json)
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Calculate new version
@@ -53,10 +69,6 @@ jobs:
             patch) patch=$((patch + 1)) ;;
           esac
           echo "version=${major}.${minor}.${patch}" >> $GITHUB_OUTPUT
-
-      - name: Update package.json version
-        run: |
-          jq '.version = "${{ steps.new.outputs.version }}"' package.json > tmp.json && mv tmp.json package.json
 
       - name: Open version-bump PR
         env:
@@ -71,6 +83,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Branch off the tip of main, not this PR's merge commit. An earlier
+          # queued Release run may have already landed a bump on main; basing
+          # the new bump branch on the stale merge commit would cause a squash
+          # conflict on package.json.
+          git fetch origin main
+          git checkout -b "$BRANCH" origin/main
+
+          # Apply the version bump on top of fresh main.
+          jq '.version = "'"$VERSION"'"' package.json > tmp.json && mv tmp.json package.json
+
           # Close any stale bump PRs for the same version (e.g. previous failed runs).
           gh pr list \
             --search "chore: bump version to v${VERSION} in:title is:open" \
@@ -78,7 +100,6 @@ jobs:
             --jq '.[].number' \
             | xargs -r -n1 -I{} gh pr close {} --delete-branch || true
 
-          git checkout -b "$BRANCH"
           git add package.json
           git commit -m "chore: bump version to v${VERSION}"
           git push -u origin "$BRANCH"
