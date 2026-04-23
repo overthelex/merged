@@ -50,10 +50,19 @@
   redir @rootOnly /en/ 302
 }
 
+# Legacy pre-i18n paths (/blog, /privacy, /terms and descendants) permanently
+# redirect to the default-locale equivalent. Preserves SEO equity from URLs
+# Google crawled before PR #99 moved pages under /[locale]/.
+(legacyLocalePathRedirects) {
+  @legacyBare path /blog /blog/* /privacy /privacy/* /terms /terms/*
+  redir @legacyBare /en{uri} 301
+}
+
 merged.com.ua, merged.legal.org.ua {
   encode zstd gzip
   import securityHeaders
   import localeRootRedirects
+  import legacyLocalePathRedirects
   reverse_proxy landing:8080
   log {
     output file /var/log/caddy/merged.log
