@@ -51,11 +51,13 @@
 }
 
 # Legacy pre-i18n paths (/blog, /privacy, /terms and descendants) permanently
-# redirect to the default-locale equivalent. Preserves SEO equity from URLs
-# Google crawled before PR #99 moved pages under /[locale]/.
+# redirect to the default-locale equivalent. The regex captures the path
+# without any trailing slash, then we re-append exactly one — this collapses
+# what would otherwise be a 301 → 308 chain (Caddy 301 to /en/blog, Next then
+# 308 to /en/blog/ for trailingSlash compliance) into a single hop.
 (legacyLocalePathRedirects) {
-  @legacyBare path /blog /blog/* /privacy /privacy/* /terms /terms/*
-  redir @legacyBare /en{uri} 301
+  @legacy path_regexp legacy ^/(blog|privacy|terms)((?:/[^/]+)*)/?$
+  redir @legacy /en/{re.legacy.1}{re.legacy.2}/ 301
 }
 
 merged.com.ua, merged.legal.org.ua {
